@@ -64,7 +64,6 @@ CMAKE_BINARY_DIR = /app/build
 
 # The main recursive "all" target.
 all: CMakeFiles/cflex_build.dir/all
-all: CMakeFiles/generate_reflection.dir/all
 all: CMakeFiles/program.dir/all
 .PHONY : all
 
