@@ -81,6 +81,7 @@ add_dependencies(program generate_reflection)
 # Organize application and library files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "Source" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "Source/Library" FILES ${LIB_SOURCE_FILES})
+source_group("Generated" FILES ${GENERATED_C})
 
 
 # --- Optional: Installation ---
