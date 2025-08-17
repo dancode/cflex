@@ -1,5 +1,0 @@
-/app/build/CMakeFiles/cflex_build.dir
-/app/build/CMakeFiles/generate_reflection.dir
-/app/build/CMakeFiles/program.dir
-/app/build/CMakeFiles/edit_cache.dir
-/app/build/CMakeFiles/rebuild_cache.dir
