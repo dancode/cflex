@@ -80,6 +80,10 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 file(GLOB_RECURSE LIB_SOURCE_FILES "src/cflex/*.c" "src/cflex/*.h")
+
+# Mark the parser as a header since it's included by cflex.c for a unity build
+set_source_files_properties(src/cflex/internal/cflex_parser.c PROPERTIES HEADER_FILE_ONLY ON)
+
 add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_SOURCE_FILES} ${GENERATED_C})
 
 

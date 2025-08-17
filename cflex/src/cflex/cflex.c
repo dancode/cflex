@@ -1,6 +1,8 @@
 #include "cflex.h"
 #include <stdio.h>
 
+#include "internal/cflex_parser.c"
+
 // This is a single-compilation-unit library.
 // The user is expected to include this .c file into their own build,
 // rather than linking against a compiled library. This is a common pattern
