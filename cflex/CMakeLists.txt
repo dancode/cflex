@@ -34,7 +34,7 @@ set_source_files_properties(src/cflex_build/cflex_platform.c PROPERTIES HEADER_F
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build FILES ${TOOL_SOURCE_FILES})
 
 # Assign the target to a solution folder for Visual Studio
-set_property(TARGET cflex_build PROPERTY FOLDER "BuildTool")
+set_property(TARGET cflex_build PROPERTY FOLDER "Source")
 
 
 # --- Generated files ---
@@ -87,7 +87,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex FILES ${LIB_SOURCE_FILES
 
 
 # Assign the target to a solution folder for Visual Studio
-set_property(TARGET program PROPERTY FOLDER "Application")
+set_property(TARGET program PROPERTY FOLDER "Source")
 
 
 # --- Optional: Installation ---
