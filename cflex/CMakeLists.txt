@@ -44,7 +44,7 @@ target_include_directories(cflex_build PUBLIC src/cflex_build)
 # Since cflex_platform.c is included directly by cflex_build.c (unity build),
 # we must tell CMake not to compile it as a separate translation unit.
 # Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
-set_source_files_properties(src/cflex_build/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
+set_source_files_properties(src/cflex_build/internal/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
 
 # Organize build tool files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "Source" FILES ${TOOL_SOURCE_FILES})
