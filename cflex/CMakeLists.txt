@@ -31,10 +31,7 @@ target_include_directories(cflex_build PUBLIC src/cflex_build)
 set_source_files_properties(src/cflex_build/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
 
 # Organize build tool files in the IDE to mirror the directory structure
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build FILES ${TOOL_SOURCE_FILES})
-
-# Assign the target to a solution folder for Visual Studio
-set_property(TARGET cflex_build PROPERTY FOLDER "Source")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "Source" FILES ${TOOL_SOURCE_FILES})
 
 
 # --- Generated files ---
@@ -82,12 +79,8 @@ target_include_directories(program PRIVATE
 add_dependencies(program generate_reflection)
 
 # Organize application and library files in the IDE to mirror the directory structure
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program FILES ${PROGRAM_SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex FILES ${LIB_SOURCE_FILES})
-
-
-# Assign the target to a solution folder for Visual Studio
-set_property(TARGET program PROPERTY FOLDER "Source")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "Source" FILES ${PROGRAM_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "Source/Library" FILES ${LIB_SOURCE_FILES})
 
 
 # --- Optional: Installation ---
