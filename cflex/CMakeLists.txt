@@ -21,11 +21,8 @@ endif()
 
 # --- cflex build tool ---
 # This executable is built first. It will be used to generate reflection code.
-add_executable(cflex_build
-    src/cflex_build/cflex_build.c
-    src/cflex_build/cflex_build.h
-    src/cflex_build/cflex_platform.c
-)
+file(GLOB_RECURSE TOOL_SOURCE_FILES "src/cflex_build/*.c" "src/cflex_build/*.h")
+add_executable(cflex_build ${TOOL_SOURCE_FILES})
 target_include_directories(cflex_build PUBLIC src/cflex_build)
 
 # Since cflex_platform.c is included directly by cflex_build.c (unity build),
@@ -33,9 +30,8 @@ target_include_directories(cflex_build PUBLIC src/cflex_build)
 # Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
 set_source_files_properties(src/cflex_build/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
 
-# Organize build tool files in the IDE
-source_group("Source Files" FILES src/cflex_build/cflex_build.c src/cflex_build/cflex_platform.c)
-source_group("Header Files" FILES src/cflex_build/cflex_build.h)
+# Organize build tool files in the IDE to mirror the directory structure
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build FILES ${TOOL_SOURCE_FILES})
 
 # Assign the target to a solution folder for Visual Studio
 set_property(TARGET cflex_build PROPERTY FOLDER "BuildTool")
@@ -69,13 +65,10 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
-add_executable(program
-    src/program/program.c
-    src/program/program.h
-    src/cflex/cflex.c
-    src/cflex/cflex.h
-    ${GENERATED_C}
-)
+file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
+file(GLOB_RECURSE LIB_SOURCE_FILES "src/cflex/*.c" "src/cflex/*.h")
+add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_SOURCE_FILES} ${GENERATED_C})
+
 
 # The program needs to include headers from several locations:
 target_include_directories(program PRIVATE
@@ -88,11 +81,10 @@ target_include_directories(program PRIVATE
 # This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
 
-# Organize application and library files in the IDE
-source_group("Source Files" FILES src/program/program.c)
-source_group("Header Files" FILES src/program/program.h)
-source_group("Library\\Source Files" FILES src/cflex/cflex.c)
-source_group("Library\\Header Files" FILES src/cflex/cflex.h)
+# Organize application and library files in the IDE to mirror the directory structure
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program FILES ${PROGRAM_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex FILES ${LIB_SOURCE_FILES})
+
 
 # Assign the target to a solution folder for Visual Studio
 set_property(TARGET program PROPERTY FOLDER "Application")
