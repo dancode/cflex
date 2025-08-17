@@ -2,7 +2,7 @@
 
 // This demonstrates the unity build approach.
 // Platform-specific code is included directly.
-#include "cflex_platform.c"
+#include "internal/cflex_platform.c"
 
 #include <stdio.h>
 #include <stdlib.h>
