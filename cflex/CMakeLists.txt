@@ -1,6 +1,22 @@
 cmake_minimum_required(VERSION 3.10)
 project(cflex C)
 
+# Configure custom output directories for binaries
+# This places executables in /bin and libraries in /lib, outside the build folder
+
+# Set default output directories for single-config builds (e.g., Makefiles)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
+
+# For multi-config builds (e.g., Visual Studio), set per-config directories
+foreach(OUTPUT_CONFIG ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${OUTPUT_CONFIG} OUTPUT_CONFIG_UPPER)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}	"${CMAKE_BINARY_DIR}/../bin/${OUTPUT_CONFIG}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}  	"${CMAKE_BINARY_DIR}/../lib/${OUTPUT_CONFIG}")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}  	"${CMAKE_BINARY_DIR}/../lib/${OUTPUT_CONFIG}")
+endforeach()
+
 # Set C11 as the standard, require it, and disable extensions for strictness
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
