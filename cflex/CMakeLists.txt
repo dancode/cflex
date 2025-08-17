@@ -63,8 +63,8 @@ add_custom_command(
 )
 
 # Add a custom target to make the generation step an explicit part of the build process.
-# Making it ALL ensures it runs on a default build.
-add_custom_target(generate_reflection ALL DEPENDS ${GENERATED_C} ${GENERATED_H})
+# This target depends on the generated files, ensuring they are created.
+add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 
 
 # --- Example Application ---
@@ -84,6 +84,10 @@ target_include_directories(program PRIVATE
     ${GENERATED_DIR}
 )
 
+# Crucially, the 'program' target must depend on the 'generate_reflection' target.
+# This ensures that the generated files are created *before* the program is compiled.
+add_dependencies(program generate_reflection)
+
 # Organize application and library files in the IDE
 source_group("Source Files" FILES src/program/program.c)
 source_group("Header Files" FILES src/program/program.h)
@@ -93,10 +97,6 @@ source_group("Library\\Header Files" FILES src/cflex/cflex.h)
 # Assign the target to a solution folder for Visual Studio
 set_property(TARGET program PROPERTY FOLDER "Application")
 
-
-# Crucially, the 'program' target must depend on the 'generate_reflection' target.
-# This ensures that the generated files are created *before* the program is compiled.
-add_dependencies(program generate_reflection)
 
 # --- Optional: Installation ---
 # This section provides rules for installing the final application and the library header.
