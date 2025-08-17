@@ -6,6 +6,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+# Enable solution folders for better organization in Visual Studio
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # Add platform-agnostic warnings, and handle MSVC separately
 if(MSVC)
     # /W4 is a high warning level, /WX treats warnings as errors.
@@ -18,24 +21,42 @@ endif()
 
 # --- cflex build tool ---
 # This executable is built first. It will be used to generate reflection code.
-add_executable(cflex_build src/cflex_build/cflex_build.c)
+add_executable(cflex_build
+    src/cflex_build/cflex_build.c
+    src/cflex_build/cflex_build.h
+    src/cflex_build/cflex_platform.c
+)
 target_include_directories(cflex_build PUBLIC src/cflex_build)
+
+# Since cflex_platform.c is included directly by cflex_build.c (unity build),
+# we must tell CMake not to compile it as a separate translation unit.
+# Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
+set_source_files_properties(src/cflex_build/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
+
+# Organize build tool files in the IDE
+source_group("Source Files" FILES src/cflex_build/cflex_build.c src/cflex_build/cflex_platform.c)
+source_group("Header Files" FILES src/cflex_build/cflex_build.h)
+
+# Assign the target to a solution folder for Visual Studio
+set_property(TARGET cflex_build PROPERTY FOLDER "BuildTool")
+
 
 # --- Generated files ---
 # Define the output directory for generated files within the build tree
 set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-# Define the full paths for the generated header and source files
+# Define the full paths for the generated header and source file
 set(GENERATED_H ${GENERATED_DIR}/cflex_generated.h)
 set(GENERATED_C ${GENERATED_DIR}/cflex_generated.c)
 
 # Add a custom command to run the cflex_build tool.
 # This command executes the cflex_build target, passing it the source directory
 # of the example program and the directory for the generated output.
+# Using a generator expression ensures the correct path to the executable is used.
 add_custom_command(
     OUTPUT ${GENERATED_C} ${GENERATED_H}
-    COMMAND cflex_build ${CMAKE_SOURCE_DIR}/src/program ${GENERATED_DIR}
+    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_SOURCE_DIR}/src/program ${GENERATED_DIR}
     DEPENDS cflex_build
     COMMENT "Generating reflection files with cflex_build"
     VERBATIM
@@ -45,20 +66,33 @@ add_custom_command(
 # Making it ALL ensures it runs on a default build.
 add_custom_target(generate_reflection ALL DEPENDS ${GENERATED_C} ${GENERATED_H})
 
+
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
-# It includes its own source, the cflex library implementation, and the generated source file.
-add_executable(program src/program/program.c src/cflex/cflex.c ${GENERATED_C})
+add_executable(program
+    src/program/program.c
+    src/program/program.h
+    src/cflex/cflex.c
+    src/cflex/cflex.h
+    ${GENERATED_C}
+)
 
 # The program needs to include headers from several locations:
-# - its own directory
-# - the cflex library directory
-# - the directory containing the generated headers
 target_include_directories(program PRIVATE
     src/program
     src/cflex
     ${GENERATED_DIR}
 )
+
+# Organize application and library files in the IDE
+source_group("Source Files" FILES src/program/program.c)
+source_group("Header Files" FILES src/program/program.h)
+source_group("Library\\Source Files" FILES src/cflex/cflex.c)
+source_group("Library\\Header Files" FILES src/cflex/cflex.h)
+
+# Assign the target to a solution folder for Visual Studio
+set_property(TARGET program PROPERTY FOLDER "Application")
+
 
 # Crucially, the 'program' target must depend on the 'generate_reflection' target.
 # This ensures that the generated files are created *before* the program is compiled.

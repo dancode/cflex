@@ -4,6 +4,6 @@
 # compile C with /usr/bin/cc
 C_DEFINES =
 
-C_INCLUDES = -I/app/cflex/src/program -I/app/cflex/src/cflex -I/app/cflex/build/generated
+C_INCLUDES = -I/app/cflex/src/program -I/app/cflex/src/cflex -I/app/build/generated
 
 C_FLAGS = -std=c11 -Wall -Wextra -pedantic -Werror

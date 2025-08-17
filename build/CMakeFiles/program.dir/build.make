@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /app/cflex
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /app/cflex/build
+CMAKE_BINARY_DIR = /app/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/program.dir/depend.make
@@ -70,8 +70,8 @@ include CMakeFiles/program.dir/progress.make
 include CMakeFiles/program.dir/flags.make
 
 generated/cflex_generated.c: cflex_build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating reflection files with cflex_build"
-	./cflex_build /app/cflex/src/program /app/cflex/build/generated
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating reflection files with cflex_build"
+	./cflex_build /app/cflex/src/program /app/build/generated
 
 generated/cflex_generated.h: generated/cflex_generated.c
 	@$(CMAKE_COMMAND) -E touch_nocreate generated/cflex_generated.h
@@ -79,7 +79,7 @@ generated/cflex_generated.h: generated/cflex_generated.c
 CMakeFiles/program.dir/src/program/program.c.o: CMakeFiles/program.dir/flags.make
 CMakeFiles/program.dir/src/program/program.c.o: /app/cflex/src/program/program.c
 CMakeFiles/program.dir/src/program/program.c.o: CMakeFiles/program.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/program.dir/src/program/program.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/program.dir/src/program/program.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/program.dir/src/program/program.c.o -MF CMakeFiles/program.dir/src/program/program.c.o.d -o CMakeFiles/program.dir/src/program/program.c.o -c /app/cflex/src/program/program.c
 
 CMakeFiles/program.dir/src/program/program.c.i: cmake_force
@@ -93,7 +93,7 @@ CMakeFiles/program.dir/src/program/program.c.s: cmake_force
 CMakeFiles/program.dir/src/cflex/cflex.c.o: CMakeFiles/program.dir/flags.make
 CMakeFiles/program.dir/src/cflex/cflex.c.o: /app/cflex/src/cflex/cflex.c
 CMakeFiles/program.dir/src/cflex/cflex.c.o: CMakeFiles/program.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/program.dir/src/cflex/cflex.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/program.dir/src/cflex/cflex.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/program.dir/src/cflex/cflex.c.o -MF CMakeFiles/program.dir/src/cflex/cflex.c.o.d -o CMakeFiles/program.dir/src/cflex/cflex.c.o -c /app/cflex/src/cflex/cflex.c
 
 CMakeFiles/program.dir/src/cflex/cflex.c.i: cmake_force
@@ -107,16 +107,16 @@ CMakeFiles/program.dir/src/cflex/cflex.c.s: cmake_force
 CMakeFiles/program.dir/generated/cflex_generated.c.o: CMakeFiles/program.dir/flags.make
 CMakeFiles/program.dir/generated/cflex_generated.c.o: generated/cflex_generated.c
 CMakeFiles/program.dir/generated/cflex_generated.c.o: CMakeFiles/program.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/program.dir/generated/cflex_generated.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/program.dir/generated/cflex_generated.c.o -MF CMakeFiles/program.dir/generated/cflex_generated.c.o.d -o CMakeFiles/program.dir/generated/cflex_generated.c.o -c /app/cflex/build/generated/cflex_generated.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/program.dir/generated/cflex_generated.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/program.dir/generated/cflex_generated.c.o -MF CMakeFiles/program.dir/generated/cflex_generated.c.o.d -o CMakeFiles/program.dir/generated/cflex_generated.c.o -c /app/build/generated/cflex_generated.c
 
 CMakeFiles/program.dir/generated/cflex_generated.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/program.dir/generated/cflex_generated.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /app/cflex/build/generated/cflex_generated.c > CMakeFiles/program.dir/generated/cflex_generated.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /app/build/generated/cflex_generated.c > CMakeFiles/program.dir/generated/cflex_generated.c.i
 
 CMakeFiles/program.dir/generated/cflex_generated.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/program.dir/generated/cflex_generated.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /app/cflex/build/generated/cflex_generated.c -o CMakeFiles/program.dir/generated/cflex_generated.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /app/build/generated/cflex_generated.c -o CMakeFiles/program.dir/generated/cflex_generated.c.s
 
 # Object files for target program
 program_OBJECTS = \
@@ -132,7 +132,7 @@ program: CMakeFiles/program.dir/src/cflex/cflex.c.o
 program: CMakeFiles/program.dir/generated/cflex_generated.c.o
 program: CMakeFiles/program.dir/build.make
 program: CMakeFiles/program.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable program"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable program"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/program.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -145,5 +145,5 @@ CMakeFiles/program.dir/clean:
 
 CMakeFiles/program.dir/depend: generated/cflex_generated.c
 CMakeFiles/program.dir/depend: generated/cflex_generated.h
-	cd /app/cflex/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /app/cflex /app/cflex /app/cflex/build /app/cflex/build /app/cflex/build/CMakeFiles/program.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /app/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /app/cflex /app/cflex /app/build /app/build /app/build/CMakeFiles/program.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/program.dir/depend
