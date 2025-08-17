@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/program.dir/src/program/program.c.o CMakeFiles/program.dir/src/cflex/cflex.c.o CMakeFiles/program.dir/generated/cflex_generated.c.o -o program
