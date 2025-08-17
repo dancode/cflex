@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /app/cflex
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /app/cflex/build
+CMAKE_BINARY_DIR = /app/build
 
 # Utility rule file for generate_reflection.
 
@@ -70,8 +70,8 @@ CMakeFiles/generate_reflection: generated/cflex_generated.c
 CMakeFiles/generate_reflection: generated/cflex_generated.h
 
 generated/cflex_generated.c: cflex_build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/app/cflex/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating reflection files with cflex_build"
-	./cflex_build /app/cflex/src/program /app/cflex/build/generated
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating reflection files with cflex_build"
+	./cflex_build /app/cflex/src/program /app/build/generated
 
 generated/cflex_generated.h: generated/cflex_generated.c
 	@$(CMAKE_COMMAND) -E touch_nocreate generated/cflex_generated.h
@@ -91,5 +91,5 @@ CMakeFiles/generate_reflection.dir/clean:
 .PHONY : CMakeFiles/generate_reflection.dir/clean
 
 CMakeFiles/generate_reflection.dir/depend:
-	cd /app/cflex/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /app/cflex /app/cflex /app/cflex/build /app/cflex/build /app/cflex/build/CMakeFiles/generate_reflection.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /app/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /app/cflex /app/cflex /app/build /app/build /app/build/CMakeFiles/generate_reflection.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/generate_reflection.dir/depend

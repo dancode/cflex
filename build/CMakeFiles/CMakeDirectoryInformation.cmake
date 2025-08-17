@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE "/app/cflex")
-set(CMAKE_RELATIVE_PATH_TOP_BINARY "/app/cflex/build")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY "/app/build")
 
 # Force unix paths in dependencies.
 set(CMAKE_FORCE_UNIX_PATHS 1)
