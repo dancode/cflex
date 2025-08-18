@@ -112,7 +112,10 @@ add_dependencies(program generate_reflection)
 
 # --- IDE File Organization ---
 # We still want to see the library and generated files in the IDE.
-set(LIB_HEADER_FILES src/cflex/cflex.h)
+set(LIB_HEADER_FILES
+    src/cflex/cflex.h
+    src/cflex/cflex_implementation.h
+)
 
 # Organize application and library files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
