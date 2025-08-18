@@ -95,7 +95,7 @@ target_include_directories(cflex INTERFACE
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 
-add_executable(program ${PROGRAM_SOURCE_FILES})
+add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_HEADER_FILES})
 
 # The program needs to include headers from its own source directory.
 target_include_directories(program PRIVATE src/program)
