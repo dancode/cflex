@@ -84,35 +84,4 @@ typedef struct cf_type_t {
 const cf_type_t *cf_find_type_by_name(const char *name);
 const cf_type_t *cf_find_type_by_id(cf_type_id_t id);
 
-#ifdef CFLEX_IMPLEMENTATION
-
-#include <string.h>
-
-// The generated source file is included here to provide the reflection data.
-#include "cflex_generated.c"
-
-const cf_type_t *cf_find_type_by_name(const char *name) {
-  if (!name) {
-    return NULL;
-  }
-
-  for (int32_t i = 0; i < cf_type_count; ++i) {
-    const cf_type_t *type = cf_type_array[i];
-    if (type && type->name && strcmp(name, type->name) == 0) {
-      return type;
-    }
-  }
-
-  return NULL;
-}
-
-const cf_type_t *cf_find_type_by_id(cf_type_id_t id) {
-  if (id >= 0 && id < CF_TYPE_ID_COUNT) {
-    return cf_type_array[id];
-  }
-  return NULL;
-}
-
-#endif // CFLEX_IMPLEMENTATION
-
 #endif // CFLEX_H

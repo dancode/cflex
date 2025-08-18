@@ -1,6 +1,6 @@
-#define CFLEX_IMPLEMENTATION
 #include "cflex.h"
 #include "program.h"
+#include "cflex_implementation.h"
 #include <stdio.h>
 
 void print_type_details(const cf_type_t* type)
