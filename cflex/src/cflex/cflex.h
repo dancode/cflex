@@ -87,16 +87,11 @@ typedef struct cf_type_t
 } cf_type_t;
 
 
-// --- Global Data ---
-// These are defined in the generated cflex_generated.c file.
-extern const cf_type_t* cf_type_array[];
-extern const int32_t cf_type_count;
-
-#include "cflex_generated.h"
-
 // --- Library API ---
-// These are implemented in cflex.c.
+// These are implemented in cflex.c. The global data they access is
+// provided at link time by a generated source file.
+
 const cf_type_t* cf_find_type_by_name(const char* name);
-const cf_type_t* cf_find_type_by_id(cf_type_id_t id);
+const cf_type_t* cf_find_type_by_id(int32_t id);
 
 #endif // CFLEX_H

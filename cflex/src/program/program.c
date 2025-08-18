@@ -1,5 +1,6 @@
 #include "cflex.h"
 #include "program.h"
+#include "cflex_generated.h" // User code includes the generated header for type IDs
 #include <stdio.h>
 
 void print_type_details(const cf_type_t* type)
