@@ -18,7 +18,6 @@
 static file_list_t   header_files = { 0 };
 static parsed_data_t parsed_data  = { 0 };
 
-
 int
 main( int argc, char** argv )
 {
@@ -37,6 +36,7 @@ main( int argc, char** argv )
 
     // 1. Scan for files
     printf("Scanning for header files in %s...\n", input_path);
+
     find_header_files(input_path, &header_files);
     printf("Found %d header file(s).\n\n", header_files.count);
 
