@@ -52,7 +52,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "source" FI
 
 # --- Generated files ---
 # Define the output directory for generated files within the build tree
-set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+set(GENERATED_DIR ${CMAKE_BINARY_DIR}/cflex_generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 # Define the full paths for the generated header and source file
@@ -76,33 +76,65 @@ add_custom_command(
 add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 
 
+# --- cflex library (header-only) ---
+# Create an INTERFACE library for cflex. This is the modern CMake way to handle
+# header-only libraries, as it allows usage requirements (like include paths)
+# to be attached to the library and propagated to consumers.
+add_library(cflex INTERFACE)
+
+# The cflex library needs its own source directory for its header, and crucially,
+# it also depends on the generated files. Adding the generated directory to the
+# INTERFACE ensures that any target linking against cflex gets this path,
+# which is the most robust way to solve IDE IntelliSense issues.
+target_include_directories(cflex INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
+    ${GENERATED_DIR}
+)
+
+
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
-file(GLOB_RECURSE LIB_SOURCE_FILES "src/cflex/*.c" "src/cflex/*.h")
 
+# Automatically find all library headers. This is used to add them to the executable
+# target so they appear in the IDE, and to the source_group for organization.
+# Using GLOB_RECURSE ensures that the full directory structure is discovered.
+file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 
-# Mark the parser as a header since it's included by cflex.c for a unity build
-set_source_files_properties(src/cflex/internal/cflex_parser.c PROPERTIES HEADER_FILE_ONLY ON)
+# Also define a variable for the generated files, so they can be added to the target.
+set(GENERATED_FILES ${GENERATED_H} ${GENERATED_C})
 
-add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_SOURCE_FILES} ${GENERATED_C})
-
-
-# The program needs to include headers from several locations:
-target_include_directories(program PRIVATE
-    src/program
-    src/cflex
-    ${GENERATED_DIR}
+add_executable(program
+    ${PROGRAM_SOURCE_FILES}
+    ${LIB_HEADER_FILES}
+    ${GENERATED_FILES}
 )
+
+# The program only needs to include headers from its own source directory.
+# The other necessary include paths will be inherited from the cflex library.
+target_include_directories(program PRIVATE src/program)
+
+# Link the program against the cflex library. This transitively applies the
+# include directories from cflex to the program, which is a more robust way
+# of managing dependencies for IDEs and build systems.
+target_link_libraries(program PRIVATE cflex)
 
 # Crucially, the 'program' target must depend on the 'generate_reflection' target.
 # This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
 
-# Organize application and library files in the IDE to mirror the directory structure
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "source/library" FILES ${LIB_SOURCE_FILES})
-source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
+# Since cflex_generated.c is included directly by cflex_implementation.h,
+# we must tell CMake not to compile it as a separate translation unit,
+# which would cause a "multiple definition" linker error.
+# Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
+set_source_files_properties(${GENERATED_C} PROPERTIES HEADER_FILE_ONLY ON)
+
+
+# --- IDE File Organization ---
+# Organize application and library files in the IDE to mirror the directory structure.
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
+source_group(TREE ${GENERATED_DIR} PREFIX "cflex_generated" FILES ${GENERATED_FILES})
 
 
 # --- Optional: Installation ---
