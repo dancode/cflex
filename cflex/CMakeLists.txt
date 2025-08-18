@@ -52,7 +52,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "source" FI
 
 # --- Generated files ---
 # Define the output directory for generated files within the build tree
-set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+set(GENERATED_DIR ${CMAKE_BINARY_DIR}/cflex_generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 # Define the full paths for the generated header and source file
@@ -82,12 +82,9 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 # to be attached to the library and propagated to consumers.
 add_library(cflex INTERFACE)
 
-# The cflex library needs its own source directory for its header, and the
-# generated files directory for the generated code, to be on its public include path.
-# This ensures that any target linking against cflex can find its headers.
+# The cflex library needs its own source directory for its header.
 target_include_directories(cflex INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
-    ${GENERATED_DIR}
 )
 
 
@@ -95,17 +92,19 @@ target_include_directories(cflex INTERFACE
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 
-# Define the list of library headers. This is used to add them to the executable
+# Automatically find all library headers. This is used to add them to the executable
 # target so they appear in the IDE, and to the source_group for organization.
-set(LIB_HEADER_FILES
-    src/cflex/cflex.h
-    src/cflex/cflex_implementation.h
-)
+# Using GLOB_RECURSE ensures that the full directory structure is discovered.
+file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 
 add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_HEADER_FILES})
 
-# The program needs to include headers from its own source directory.
-target_include_directories(program PRIVATE src/program)
+# The program needs to include headers from its own source directory and from
+# the generated files directory to fix IDE intellisense issues.
+target_include_directories(program PRIVATE
+    src/program
+    ${GENERATED_DIR}
+)
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way
@@ -121,7 +120,7 @@ add_dependencies(program generate_reflection)
 # Organize application and library files in the IDE to mirror the directory structure.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
-source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
+source_group("cflex_generated" FILES ${GENERATED_C} ${GENERATED_H})
 
 
 # --- Optional: Installation ---
