@@ -110,9 +110,14 @@ add_executable(program
     ${GENERATED_FILES}
 )
 
-# The program only needs to include headers from its own source directory.
-# The other necessary include paths will be inherited from the cflex library.
-target_include_directories(program PRIVATE src/program)
+# The program needs to include headers from its own source directory.
+# We also redundantly add the generated directory here to work around a common
+# Visual Studio IntelliSense quirk where it doesn't correctly inherit
+# include paths from INTERFACE libraries for live analysis.
+target_include_directories(program PRIVATE
+    src/program
+    ${GENERATED_DIR}
+)
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way
