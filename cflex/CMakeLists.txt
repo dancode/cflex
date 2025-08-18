@@ -78,13 +78,7 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C})
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
-set(LIB_SOURCE_FILES
-    src/cflex/cflex.c
-    src/cflex/cflex.h
-    src/cflex/cflex_macros.h
-    src/cflex/cflex_generated.h # This is a placeholder for IDEs, it's generated at build time
-)
-set_source_files_properties(src/cflex/cflex_generated.h PROPERTIES GENERATED TRUE)
+file(GLOB_RECURSE LIB_SOURCE_FILES "src/cflex/*.c" "src/cflex/*.h")
 
 
 # Mark the parser as a header since it's included by cflex.c for a unity build
