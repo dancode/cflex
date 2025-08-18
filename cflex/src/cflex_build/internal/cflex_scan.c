@@ -26,10 +26,7 @@ void find_header_files(const char* path, file_list_t* header_files) {
     for (int i = 0; i < all_files.count; ++i) {
         if (ends_with(all_files.files[i], ".h")) {
             if (header_files->count < MAX_FILES) {
-                // Ensure we don't overflow the buffer
-                strncpy(header_files->files[header_files->count], all_files.files[i], MAX_PATH_LENGTH - 1);
-                // Explicitly null-terminate
-                header_files->files[header_files->count][MAX_PATH_LENGTH - 1] = '\0';
+                str_copy(header_files->files[header_files->count], all_files.files[i], MAX_PATH_LENGTH);
                 header_files->count++;
             } else {
                 fprintf(stderr, "Warning: Exceeded max header file limit of %d\n", MAX_FILES);

@@ -33,6 +33,13 @@ const char* ltrim(const char* str);
 // Checks if a character can be part of a C identifier.
 bool is_identifier_char(char c);
 
+
+// Safely copies a null-terminated string. Always null-terminates the destination.
+void str_copy(char* dst, const char* src, int32_t dst_size);
+
+// Safely copies N characters from a source string. Always null-terminates.
+void substr_copy(char* dst, const char* src, int32_t len, int32_t dst_size);
+
 // -----------------------------------------------------------------------------
 // Scan
 // -----------------------------------------------------------------------------
