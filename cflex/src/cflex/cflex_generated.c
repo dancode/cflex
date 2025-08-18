@@ -1,5 +1,5 @@
-#include "cflex.h"
-#include "program_types.h"
+#include "cflex/cflex.h"
+#include "program/program.h"
 #include <stddef.h> // For offsetof
 
 // -- Forward declarations for all type definitions --
