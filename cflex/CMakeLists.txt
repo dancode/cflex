@@ -95,6 +95,13 @@ target_include_directories(cflex INTERFACE
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 
+# Define the list of library headers. This is used to add them to the executable
+# target so they appear in the IDE, and to the source_group for organization.
+set(LIB_HEADER_FILES
+    src/cflex/cflex.h
+    src/cflex/cflex_implementation.h
+)
+
 add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_HEADER_FILES})
 
 # The program needs to include headers from its own source directory.
@@ -111,13 +118,7 @@ add_dependencies(program generate_reflection)
 
 
 # --- IDE File Organization ---
-# We still want to see the library and generated files in the IDE.
-set(LIB_HEADER_FILES
-    src/cflex/cflex.h
-    src/cflex/cflex_implementation.h
-)
-
-# Organize application and library files in the IDE to mirror the directory structure
+# Organize application and library files in the IDE to mirror the directory structure.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
 source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
