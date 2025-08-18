@@ -41,7 +41,6 @@ main( int argc, char** argv )
     printf("Found %d header file(s).\n\n", header_files.count);
 
     // 2. Parse files
-
     for (int i = 0; i < header_files.count; ++i) {
         if (!parse_header_file(header_files.files[i], &parsed_data)) {
             fprintf(stderr, "Error parsing file, aborting.\n");
