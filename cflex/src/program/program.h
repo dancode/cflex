@@ -1,10 +1,9 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include "cflex/cflex_macros.h"
+#include "cflex_macros.h"
 #include <stdint.h>
 
-// Note: In a real project, you might include a base vector library header instead.
 CF_STRUCT()
 typedef struct vec2_t {
     CF_FIELD() float x;

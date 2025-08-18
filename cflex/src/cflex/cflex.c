@@ -1,4 +1,4 @@
-#include "cflex/cflex.h"
+#include "cflex.h"
 #include <string.h>
 
 const cf_type_t* cf_find_type_by_name(const char* name)
