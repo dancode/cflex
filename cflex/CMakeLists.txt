@@ -101,7 +101,14 @@ file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 # Using GLOB_RECURSE ensures that the full directory structure is discovered.
 file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 
-add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_HEADER_FILES})
+# Also define a variable for the generated files, so they can be added to the target.
+set(GENERATED_FILES ${GENERATED_H} ${GENERATED_C})
+
+add_executable(program
+    ${PROGRAM_SOURCE_FILES}
+    ${LIB_HEADER_FILES}
+    ${GENERATED_FILES}
+)
 
 # The program only needs to include headers from its own source directory.
 # The other necessary include paths will be inherited from the cflex library.
@@ -116,12 +123,18 @@ target_link_libraries(program PRIVATE cflex)
 # This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
 
+# Since cflex_generated.c is included directly by cflex_implementation.h,
+# we must tell CMake not to compile it as a separate translation unit,
+# which would cause a "multiple definition" linker error.
+# Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
+set_source_files_properties(${GENERATED_C} PROPERTIES HEADER_FILE_ONLY ON)
+
 
 # --- IDE File Organization ---
 # Organize application and library files in the IDE to mirror the directory structure.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
-source_group("cflex_generated" FILES ${GENERATED_C} ${GENERATED_H})
+source_group(TREE ${GENERATED_DIR} PREFIX "cflex_generated" FILES ${GENERATED_FILES})
 
 
 # --- Optional: Installation ---
