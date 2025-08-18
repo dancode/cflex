@@ -82,9 +82,13 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 # to be attached to the library and propagated to consumers.
 add_library(cflex INTERFACE)
 
-# The cflex library needs its own source directory for its header.
+# The cflex library needs its own source directory for its header, and crucially,
+# it also depends on the generated files. Adding the generated directory to the
+# INTERFACE ensures that any target linking against cflex gets this path,
+# which is the most robust way to solve IDE IntelliSense issues.
 target_include_directories(cflex INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
+    ${GENERATED_DIR}
 )
 
 
@@ -99,12 +103,9 @@ file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 
 add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_HEADER_FILES})
 
-# The program needs to include headers from its own source directory and from
-# the generated files directory to fix IDE intellisense issues.
-target_include_directories(program PRIVATE
-    src/program
-    ${GENERATED_DIR}
-)
+# The program only needs to include headers from its own source directory.
+# The other necessary include paths will be inherited from the cflex library.
+target_include_directories(program PRIVATE src/program)
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way
