@@ -7,6 +7,9 @@
 // The generated source file is included here to provide the reflection data.
 #include "cflex_generated.c"
 
+// Include internal implementation files (unity build style).
+#include "internal/cflex_parser.h"
+
 const cf_type_t *cf_find_type_by_name(const char *name) {
   if (!name) {
     return NULL;
