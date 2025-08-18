@@ -5,8 +5,7 @@
 #include <string.h>
 
 // The generated source file is included here to provide the reflection data.
-// Using angle brackets as a hint to the IDE to search the include paths.
-#include <cflex_generated.c>
+#include "cflex_generated.c"
 
 // Include internal implementation files (unity build style).
 #include "internal/cflex_parser.h"
