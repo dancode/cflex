@@ -18,7 +18,6 @@
 static file_list_t   header_files = { 0 };
 static parsed_data_t parsed_data  = { 0 };
 
-
 int
 main( int argc, char** argv )
 {
@@ -37,10 +36,12 @@ main( int argc, char** argv )
 
     // 1. Scan for files
     printf("Scanning for header files in %s...\n", input_path);
+
     find_header_files(input_path, &header_files);
     printf("Found %d header file(s).\n\n", header_files.count);
 
     // 2. Parse files
+
     for (int i = 0; i < header_files.count; ++i) {
         if (!parse_header_file(header_files.files[i], &parsed_data)) {
             fprintf(stderr, "Error parsing file, aborting.\n");

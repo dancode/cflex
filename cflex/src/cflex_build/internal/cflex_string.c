@@ -29,3 +29,4 @@ void substr_copy(char* dst, const char* src, int32_t len, int32_t dst_size) {
     memcpy(dst, src, copy_len);
     dst[copy_len] = '\0';
 }
+
