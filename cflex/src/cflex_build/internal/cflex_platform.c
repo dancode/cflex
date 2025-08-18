@@ -6,12 +6,14 @@
 #include <stdio.h>
 
 #ifdef _WIN32
-#define PLATFORM_NAME "Windows"
+#    define PLATFORM_NAME "Windows"
 #else
-#define PLATFORM_NAME "Linux/Other"
+#    define PLATFORM_NAME "Linux/Other"
 #endif
 
 // Example of a function that could have platform-specific implementations.
-void print_platform(void) {
-    printf("Build tool is running on platform: %s\n", PLATFORM_NAME);
+void
+print_platform( void )
+{
+    printf( "Build tool is running on platform: %s\n", PLATFORM_NAME );
 }

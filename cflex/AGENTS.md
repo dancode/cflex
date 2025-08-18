@@ -9,6 +9,12 @@ This file provides instructions for AI agents working on this codebase.
 - **Type Names:** All `struct` type definitions must use a `_t` suffix. For example: `my_struct_t`.
 - **Build System:** This project uses CMake. All build-related changes must be made in the `CMakeLists.txt` files.
 
+## Coding Style 
+
+- Write this code in clear, idiomatic C11. Focus on naming, organization, and adding concise comments. 
+- Do not worry about exact indentation, brace style, or line wrapping — I will run a formatter (e.g., clang-format) after.
+- 
+
 ## High Level Project Overview
 
 - The project goal is a strict C11 reflection library (cflex) and an associated code generation tool (cflex_build) -- There are three parts.

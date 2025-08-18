@@ -5,20 +5,23 @@
 #include <stdint.h>
 
 CF_STRUCT()
-typedef struct vec2_t {
+typedef struct vec2_t
+{
     CF_FIELD() float x;
     CF_FIELD() float y;
 } vec2_t;
 
 CF_STRUCT()
-typedef struct vec3_t {
+typedef struct vec3_t
+{
     CF_FIELD() float x;
     CF_FIELD() float y;
     CF_FIELD() float z;
 } vec3_t;
 
 CF_STRUCT()
-typedef struct player_t {
+typedef struct player_t
+{
     CF_FIELD() int32_t power;
     CF_FIELD() float health;
     CF_FIELD() vec3_t position;
@@ -32,4 +35,4 @@ typedef enum color_t
     COLOR_BLUE
 } color_t;
 
-#endif // PROGRAM_H
+#endif    // PROGRAM_H
