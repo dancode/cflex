@@ -118,8 +118,8 @@ set(LIB_HEADER_FILES
 )
 
 # Organize application and library files in the IDE to mirror the directory structure
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "source/library" FILES ${LIB_HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
 source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
 
 
