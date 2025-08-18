@@ -92,23 +92,11 @@ typedef struct cf_type_t
 extern const cf_type_t* cf_type_array[];
 extern const int32_t cf_type_count;
 
-#include "cflex/cflex_generated.h" // Include public generated symbols
+#include "cflex_generated.h"
 
 // --- Library API ---
 // These are implemented in cflex.c.
-
-/**
- * @brief Finds a type descriptor by its name.
- * @param name The name of the type to find (e.g., "player_t").
- * @return A pointer to the type descriptor, or NULL if not found.
- */
 const cf_type_t* cf_find_type_by_name(const char* name);
-
-/**
- * @brief Finds a type descriptor by its generated ID.
- * @param id The ID of the type to find (e.g., CF_TYPE_ID_PLAYER_T).
- * @return A pointer to the type descriptor, or NULL if the ID is invalid.
- */
 const cf_type_t* cf_find_type_by_id(cf_type_id_t id);
 
 #endif // CFLEX_H
