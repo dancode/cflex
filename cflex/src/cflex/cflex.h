@@ -86,12 +86,14 @@ typedef struct cf_type_t
     };
 } cf_type_t;
 
+// Include the public generated header which defines cf_type_id_t
+#include "cflex_generated.h"
 
 // --- Library API ---
-// These are implemented in cflex.c. The global data they access is
-// provided at link time by a generated source file.
+extern const cf_type_t* cf_type_array[];
+extern const int32_t cf_type_count;
 
 const cf_type_t* cf_find_type_by_name(const char* name);
-const cf_type_t* cf_find_type_by_id(int32_t id);
+const cf_type_t* cf_find_type_by_id(cf_type_id_t id);
 
 #endif // CFLEX_H

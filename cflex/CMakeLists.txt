@@ -56,6 +56,7 @@ set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 # Define the full paths for the generated header and source file
+set(GENERATED_H ${GENERATED_DIR}/cflex_generated.h)
 set(GENERATED_C ${GENERATED_DIR}/cflex_generated.c)
 
 # Add a custom command to run the cflex_build tool.
@@ -63,7 +64,7 @@ set(GENERATED_C ${GENERATED_DIR}/cflex_generated.c)
 # of the example program and the directory for the generated output.
 # Using a generator expression ensures the correct path to the executable is used.
 add_custom_command(
-    OUTPUT ${GENERATED_C}
+    OUTPUT ${GENERATED_C} ${GENERATED_H}
     COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_SOURCE_DIR}/src/program ${GENERATED_DIR}
     DEPENDS cflex_build
     COMMENT "Generating reflection files with cflex_build"
@@ -72,7 +73,7 @@ add_custom_command(
 
 # Add a custom target to make the generation step an explicit part of the build process.
 # This target depends on the generated files, ensuring they are created.
-add_custom_target(generate_reflection DEPENDS ${GENERATED_C})
+add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 
 
 # --- Example Application ---
@@ -101,7 +102,7 @@ add_dependencies(program generate_reflection)
 # Organize application and library files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "source/library" FILES ${LIB_SOURCE_FILES})
-source_group("generated" FILES ${GENERATED_C})
+source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
 
 
 # --- Optional: Installation ---
