@@ -79,13 +79,14 @@ add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
-file(GLOB_RECURSE LIB_SOURCE_FILES "src/cflex/*.c" "src/cflex/*.h")
 
+# The cflex library is now a single header file. We list it here so it appears
+# in the IDE's file explorer.
+set(LIB_HEADER_FILES src/cflex/cflex.h)
 
-# Mark the parser as a header since it's included by cflex.c for a unity build
-set_source_files_properties(src/cflex/internal/cflex_parser.c PROPERTIES HEADER_FILE_ONLY ON)
-
-add_executable(program ${PROGRAM_SOURCE_FILES} ${LIB_SOURCE_FILES} ${GENERATED_C})
+# The program is built from its own sources. cflex.h will be included by program.c
+# and the generated source file is included by cflex.h, so neither are listed here.
+add_executable(program ${PROGRAM_SOURCE_FILES})
 
 
 # The program needs to include headers from several locations:
@@ -101,7 +102,7 @@ add_dependencies(program generate_reflection)
 
 # Organize application and library files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "source/library" FILES ${LIB_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "source/library" FILES ${LIB_HEADER_FILES})
 source_group("generated" FILES ${GENERATED_C} ${GENERATED_H})
 
 

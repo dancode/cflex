@@ -1,3 +1,4 @@
+#define CFLEX_IMPLEMENTATION
 #include "cflex.h"
 #include "program.h"
 #include <stdio.h>
