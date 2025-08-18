@@ -76,29 +76,43 @@ add_custom_command(
 add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
 
 
+# --- cflex library (header-only) ---
+# Create an INTERFACE library for cflex. This is the modern CMake way to handle
+# header-only libraries, as it allows usage requirements (like include paths)
+# to be attached to the library and propagated to consumers.
+add_library(cflex INTERFACE)
+
+# The cflex library needs its own source directory for its header, and the
+# generated files directory for the generated code, to be on its public include path.
+# This ensures that any target linking against cflex can find its headers.
+target_include_directories(cflex INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
+    ${GENERATED_DIR}
+)
+
+
 # --- Example Application ---
 # This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
 
-# The cflex library is now a single header file. We list it here so it appears
-# in the IDE's file explorer.
-set(LIB_HEADER_FILES src/cflex/cflex.h)
-
-# The program is built from its own sources. cflex.h will be included by program.c
-# and the generated source file is included by cflex.h, so neither are listed here.
 add_executable(program ${PROGRAM_SOURCE_FILES})
 
+# The program needs to include headers from its own source directory.
+target_include_directories(program PRIVATE src/program)
 
-# The program needs to include headers from several locations:
-target_include_directories(program PRIVATE
-    src/program
-    src/cflex
-    ${GENERATED_DIR}
-)
+# Link the program against the cflex library. This transitively applies the
+# include directories from cflex to the program, which is a more robust way
+# of managing dependencies for IDEs and build systems.
+target_link_libraries(program PRIVATE cflex)
 
 # Crucially, the 'program' target must depend on the 'generate_reflection' target.
 # This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
+
+
+# --- IDE File Organization ---
+# We still want to see the library and generated files in the IDE.
+set(LIB_HEADER_FILES src/cflex/cflex.h)
 
 # Organize application and library files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" FILES ${PROGRAM_SOURCE_FILES})
