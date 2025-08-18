@@ -12,8 +12,7 @@ This file provides instructions for AI agents working on this codebase.
 ## Coding Style 
 
 - Write this code in clear, idiomatic C11. Focus on naming, organization, and adding concise comments. 
-- Do not worry about exact indentation, brace style, or line wrapping — I will run a formatter (e.g., clang-format) after.
-- 
+- Use the .clang-format in the project directory if you can incorporate code formatting into your build steps.
 
 ## High Level Project Overview
 
