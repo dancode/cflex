@@ -41,10 +41,14 @@ file(GLOB_RECURSE TOOL_SOURCE_FILES "src/cflex_build/*.c" "src/cflex_build/*.h")
 add_executable(cflex_build ${TOOL_SOURCE_FILES})
 target_include_directories(cflex_build PUBLIC src/cflex_build)
 
-# Since cflex_platform.c is included directly by cflex_build.c (unity build),
-# we must tell CMake not to compile it as a separate translation unit.
-# Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
+# Since internal .c files are included directly by cflex_build.c (unity build),
+# we must tell CMake not to compile them as a separate translation unit.
+# Setting HEADER_FILE_ONLY ensures they are still visible in IDEs like Visual Studio.
 set_source_files_properties(src/cflex_build/internal/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
+set_source_files_properties(src/cflex_build/internal/cflex_scan.c PROPERTIES HEADER_FILE_ONLY ON)
+set_source_files_properties(src/cflex_build/internal/cflex_parse.c PROPERTIES HEADER_FILE_ONLY ON)
+set_source_files_properties(src/cflex_build/internal/cflex_output.c PROPERTIES HEADER_FILE_ONLY ON)
+set_source_files_properties(src/cflex_build/internal/cflex_string.c PROPERTIES HEADER_FILE_ONLY ON)
 
 # Organize build tool files in the IDE to mirror the directory structure
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "source" FILES ${TOOL_SOURCE_FILES})
