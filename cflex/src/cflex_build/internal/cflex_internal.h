@@ -113,4 +113,40 @@ bool parse_header_file(const char* filepath, parsed_data_t* data);
 // Returns false on failure.
 bool generate_output_files(const char* output_path, const parsed_data_t* data, const file_list_t* headers);
 
+// --- Standard Library Wrappers ---
+
+// ctype.h
+int char_is_space(int c);
+int char_is_alnum(int c);
+int char_is_alpha(int c);
+int char_is_digit(int c);
+int char_to_upper(int c);
+
+// stdio.h
+int print_printf(const char* format, ...);
+int print_fprintf(FILE* stream, const char* format, ...);
+int print_snprintf(char* str, size_t size, const char* format, ...);
+
+// stdlib.h
+void* mem_alloc(size_t size);
+void* mem_calloc(size_t num, size_t size);
+void  mem_free(void* ptr);
+
+// system
+char* sys_get_cwd(char* buf, int size);
+
+// string.h
+void* mem_copy(void* dest, const void* src, size_t n);
+void* mem_set(void* s, int c, size_t n);
+int   str_cmp(const char* s1, const char* s2);
+int   str_ncmp(const char* s1, const char* s2, size_t n);
+size_t str_len(const char* s);
+char* str_cpy(char* dest, const char* src);
+char* str_ncpy(char* dest, const char* src, size_t n);
+char* str_cat(char* dest, const char* src);
+char* str_ncat(char* dest, const char* src, size_t n);
+char* str_chr(const char* s, int c);
+char* str_rchr(const char* s, int c);
+char* str_str(const char* haystack, const char* needle);
+
 #endif // CFLEX_INTERNAL_H
