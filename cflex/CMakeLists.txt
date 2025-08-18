@@ -119,11 +119,6 @@ target_include_directories(program PRIVATE src/program)
 # of managing dependencies for IDEs and build systems.
 target_link_libraries(program PRIVATE cflex)
 
-# Link the program against the cflex library. This transitively applies the
-# include directories from cflex to the program, which is a more robust way
-# of managing dependencies for IDEs and build systems.
-target_link_libraries(program PRIVATE cflex)
-
 # Crucially, the 'program' target must depend on the 'generate_reflection' target.
 # This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
