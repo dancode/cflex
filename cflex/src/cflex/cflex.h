@@ -91,6 +91,6 @@ typedef struct cf_type_t
 
 // --- Library API ---
 const cf_type_t* cf_find_type_by_name( const char* name );
-const cf_type_t* cf_find_type_by_id( cf_type_id_t id );
+// const cf_type_t* cf_find_type_by_id( cf_type_id_t id );
 
 #endif    // CFLEX_H

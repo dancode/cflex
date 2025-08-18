@@ -28,7 +28,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Add platform-agnostic warnings, and handle MSVC separately
 if(MSVC)
     # /W4 is a high warning level, /WX treats warnings as errors.
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4 /WX)    
 else()
     # -Wall -Wextra are common warning flags, -pedantic enforces standard compliance,
     # and -Werror treats warnings as errors.
@@ -116,7 +116,10 @@ add_executable(program
 
 # The program only needs to include headers from its own source directory.
 # The other necessary include paths will be inherited from the cflex library.
-target_include_directories(program PRIVATE src/program)
+target_include_directories(program PRIVATE 
+    src/program    
+    ${GENERATED_DIR}
+)
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way

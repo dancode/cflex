@@ -30,9 +30,9 @@ typedef struct player_t
 CF_ENUM()
 typedef enum color_t
 {
-    COLOR_RED = 0,
-    COLOR_GREEN,
-    COLOR_BLUE
+    COLOR_RED   = 0,
+    COLOR_GREEN = 1,
+    COLOR_BLUE  = 2
 } color_t;
 
 #endif    // PROGRAM_H

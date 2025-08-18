@@ -42,6 +42,18 @@ void substr_copy(char* dst, const char* src, int32_t len, int32_t dst_size);
 // -----------------------------------------------------------------------------
 // Scan
 // -----------------------------------------------------------------------------
+
+// Check if compiling for a Windows environment.
+// _WIN32 is a common preprocessor macro defined by most compilers for Windows.
+#if defined( _WIN32 )
+const char PATH_CHAR_SEPARATOR = '\\';
+const char PATH_CHAR_SEPARATOR_WRONG = '/';
+#else
+// Assumes a Unix-like system (Linux, macOS, etc.) otherwise.
+const char PATH_CHAR_SEPARATOR = '/';
+const char PATH_CHAR_SEPARATOR_WRONG = '\\';
+
+#endif
 // Finds all files with a .h extension in a directory and populates the header_files list.
 void find_header_files(const char* path, file_list_t* header_files);
 
