@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -13,23 +10,23 @@ bool scan_directory(const char* path, file_list_t* file_list) {
 
 #ifdef _WIN32
     char search_path[MAX_PATH_LENGTH];
-    snprintf(search_path, sizeof(search_path), "%s\\*", path);
+    print_snprintf(search_path, sizeof(search_path), "%s\\*", path);
 
     WIN32_FIND_DATAA find_data;
     HANDLE h_find = FindFirstFileA(search_path, &find_data);
 
     if (h_find == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Error: Could not open directory %s\n", path);
+        print_fprintf(stderr, "Error: Could not open directory %s\n", path);
         return false;
     }
 
     do {
-        if (strcmp(find_data.cFileName, ".") != 0 && strcmp(find_data.cFileName, "..") != 0) {
+        if (str_cmp(find_data.cFileName, ".") != 0 && str_cmp(find_data.cFileName, "..") != 0) {
             if (file_list->count < MAX_FILES) {
-                snprintf(file_list->files[file_list->count], MAX_PATH_LENGTH, "%s\\%s", path, find_data.cFileName);
+                print_snprintf(file_list->files[file_list->count], MAX_PATH_LENGTH, "%s\\%s", path, find_data.cFileName);
                 file_list->count++;
             } else {
-                fprintf(stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES);
+                print_fprintf(stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES);
                 break;
             }
         }
@@ -39,18 +36,18 @@ bool scan_directory(const char* path, file_list_t* file_list) {
 #else // POSIX
     DIR* dir = opendir(path);
     if (dir == NULL) {
-        fprintf(stderr, "Error: Could not open directory %s\n", path);
+        print_fprintf(stderr, "Error: Could not open directory %s\n", path);
         return false;
     }
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+        if (str_cmp(entry->d_name, ".") != 0 && str_cmp(entry->d_name, "..") != 0) {
              if (file_list->count < MAX_FILES) {
-                snprintf(file_list->files[file_list->count], MAX_PATH_LENGTH, "%s/%s", path, entry->d_name);
+                print_snprintf(file_list->files[file_list->count], MAX_PATH_LENGTH, "%s/%s", path, entry->d_name);
                 file_list->count++;
             } else {
-                fprintf(stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES);
+                print_fprintf(stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES);
                 break;
             }
         }

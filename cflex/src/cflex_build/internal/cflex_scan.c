@@ -1,7 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 // Fixes path separators for cross-platform compatibility.
 void
 fix_path_separators( char* path )
@@ -11,7 +7,7 @@ fix_path_separators( char* path )
         return;
     }
 
-    size_t length = strlen( path );
+    size_t length = str_len( path );
     if ( length == 0 )
     {
         return;
@@ -35,13 +31,13 @@ ends_with( const char* str, const char* suffix )
     {
         return false;
     }
-    size_t str_len    = strlen( str );
-    size_t suffix_len = strlen( suffix );
-    if ( suffix_len > str_len )
+    size_t s_len    = str_len( str );
+    size_t suf_len = str_len( suffix );
+    if ( suf_len > s_len )
     {
         return false;
     }
-    return strncmp( str + str_len - suffix_len, suffix, suffix_len ) == 0;
+    return str_ncmp( str + s_len - suf_len, suffix, suf_len ) == 0;
 }
 
 static file_list_t all_files;
@@ -68,7 +64,7 @@ find_header_files( const char* path, file_list_t* header_files )
             }
             else
             {
-                fprintf( stderr, "Warning: Exceeded max header file limit of %d\n", MAX_FILES );
+                print_fprintf( stderr, "Warning: Exceeded max header file limit of %d\n", MAX_FILES );
                 break;
             }
         }

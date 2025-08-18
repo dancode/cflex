@@ -10,6 +10,7 @@
 
 // --- Unity Build ---
 // Include the implementation files directly.
+#include "internal/cflex_std.c"
 #include "internal/cflex_platform.c"
 #include "internal/cflex_string.c"
 #include "internal/cflex_scan.c"
@@ -21,8 +22,6 @@
 // to avoid blowing the stack in main().
 static file_list_t   header_files = { 0 };
 static parsed_data_t parsed_data  = { 0 };
-
-#include <direct.h>
 
 #define CFLEX_BUILD_DEBUG    // define to allow runnig build tool to debug directly without using command line
 
@@ -39,7 +38,7 @@ main( int argc, char** argv )
     {
         if ( 0 )
         {
-            fprintf( stderr, "Usage: %s <input_path> <output_path>\n", argv[ 0 ] );
+            print_fprintf( stderr, "Usage: %s <input_path> <output_path>\n", argv[ 0 ] );
             return 1;
         }
     }
@@ -54,9 +53,9 @@ main( int argc, char** argv )
         output_path = argv[ 2 ];
     }
 
-    printf( "Cflexbuild Reflection Generator\n" );
-    printf( "Input Path: %s\n", input_path );
-    printf( "Output Path: %s\n", output_path );
+    print_printf( "Cflexbuild Reflection Generator\n" );
+    print_printf( "Input Path: %s\n", input_path );
+    print_printf( "Output Path: %s\n", output_path );
 
     if ( 1 )
     {
@@ -68,30 +67,30 @@ main( int argc, char** argv )
         }
 
         char buf[ 1024 ];
-        if ( _getcwd( buf, sizeof( buf ) ) )
+        if ( sys_get_cwd( buf, sizeof( buf ) ) )
         {
-            fprintf( f, "Current working directory: %s\n", buf );
+            print_fprintf( f, "Current working directory: %s\n", buf );
         }
 
-        fprintf( f, "Cflexbuild Reflection Generator\n" );
-        fprintf( f, "Input Path: %s\n", input_path );
-        fprintf( f, "Output Path: %s\n", output_path );
+        print_fprintf( f, "Cflexbuild Reflection Generator\n" );
+        print_fprintf( f, "Input Path: %s\n", input_path );
+        print_fprintf( f, "Output Path: %s\n", output_path );
 
         fclose( f );
     }
 
     // 1. Scan for files
-    printf( "Scanning for header files in %s...\n", input_path );
+    print_printf( "Scanning for header files in %s...\n", input_path );
 
     find_header_files( input_path, &header_files );
-    printf( "Found %d header file(s).\n\n", header_files.count );
+    print_printf( "Found %d header file(s).\n\n", header_files.count );
 
     // 2. Parse files
     for ( int i = 0; i < header_files.count; ++i )
     {
         if ( !parse_header_file( header_files.files[ i ], &parsed_data ) )
         {
-            fprintf( stderr, "Error parsing file, aborting.\n" );
+            print_fprintf( stderr, "Error parsing file, aborting.\n" );
             return 1;
         }
     }
@@ -99,7 +98,7 @@ main( int argc, char** argv )
     // 3. Generate output
     if ( !generate_output_files( output_path, &parsed_data, &header_files ) )
     {
-        fprintf( stderr, "Error generating output files, aborting.\n" );
+        print_fprintf( stderr, "Error generating output files, aborting.\n" );
         return 1;
     }
 
