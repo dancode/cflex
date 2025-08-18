@@ -1,6 +1,5 @@
 #include "cflex.h"
 #include "program.h"
-#include "cflex_generated.h" // User code includes the generated header for type IDs
 #include <stdio.h>
 
 void print_type_details(const cf_type_t* type)
@@ -59,11 +58,6 @@ int main(int argc, char** argv)
     printf("Searching for 'non_existent_type'...\n");
     const cf_type_t* non_existent_type = cf_find_type_by_name("non_existent_type");
     print_type_details(non_existent_type);
-    printf("\n");
-
-    printf("Searching for type by ID: CF_TYPE_ID_PLAYER_T...\n");
-    const cf_type_t* player_by_id = cf_find_type_by_id(CF_TYPE_ID_PLAYER_T);
-    print_type_details(player_by_id);
 
     return 0;
 }
