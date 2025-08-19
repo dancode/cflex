@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 // Include the internal API header
 #include "internal/cflex_internal.h"
@@ -17,6 +18,9 @@
 #include "internal/cflex_std.c"
 #include "internal/cflex_platform.c"
 #include "internal/cflex_scan.c"
+#include "internal/cflex_parse_util.c"
+#include "internal/cflex_parse_struct.c"
+#include "internal/cflex_parse_enum.c"
 #include "internal/cflex_parse.c"
 #include "internal/cflex_output.c"
 
