@@ -34,7 +34,7 @@ static parsed_data_t parsed_data  = { 0 };
 //
 // 1. Scans a specified input directory for C header files (`.h`).
 // 2. Parses these header files to find `struct` and `enum` definitions that
-//    are marked up with `CFLEX_` macros.
+//    are marked up with `CF_` macros (cflex_macros.h).
 // 3. Collects information about these types, such as their names, fields,
 //    and enum values.
 // 4. Generates two files in the specified output directory:
@@ -50,34 +50,34 @@ static parsed_data_t parsed_data  = { 0 };
 #if CFLEX_BUILD_DEBUG
 // Prints sizeof() stats for internal data types and static data structures.
 // This provides a quick overview of the memory footprint of the tool's data.
-static void cflex_build_debug_print_stats()
+static void
+cflex_build_debug_print_stats()
 {
-    print_fmt("--- cflex_build debug stats ---\n");
-    print_fmt("sizeof(file_list_t) = %zu\n", sizeof(file_list_t));
-    print_fmt("sizeof(parsed_field_t) = %zu\n", sizeof(parsed_field_t));
-    print_fmt("sizeof(parsed_enum_value_t) = %zu\n", sizeof(parsed_enum_value_t));
-    print_fmt("sizeof(parsed_type_t) = %zu\n", sizeof(parsed_type_t));
-    print_fmt("sizeof(parsed_data_t) = %zu\n", sizeof(parsed_data_t));
-    print_fmt("\n");
-    print_fmt("sizeof(static file_list_t header_files) = %zu\n", sizeof(header_files));
-    print_fmt("sizeof(static parsed_data_t parsed_data) = %zu\n", sizeof(parsed_data));
-    print_fmt("--- end cflex_build debug stats ---\n\n");
+    print_fmt( "--- cflex_build debug stats ---\n" );
+    print_fmt( "sizeof(file_list_t) = %zu\n", sizeof( file_list_t ) );
+    print_fmt( "sizeof(parsed_field_t) = %zu\n", sizeof( parsed_field_t ) );
+    print_fmt( "sizeof(parsed_enum_value_t) = %zu\n", sizeof( parsed_enum_value_t ) );
+    print_fmt( "sizeof(parsed_type_t) = %zu\n", sizeof( parsed_type_t ) );
+    print_fmt( "sizeof(parsed_data_t) = %zu\n", sizeof( parsed_data_t ) );
+    print_fmt( "\n" );
+    print_fmt( "sizeof(static file_list_t header_files) = %zu\n", sizeof( header_files ) );
+    print_fmt( "sizeof(static parsed_data_t parsed_data) = %zu\n", sizeof( parsed_data ) );
+    print_fmt( "--- end cflex_build debug stats ---\n\n" );
 }
 #endif
 
 int
 main( int argc, char** argv )
 {
-#if CFLEX_BUILD_DEBUG
-    // When debugging is enabled, this function prints sizeof() stats for
-    // internal data types and static data structures.
-    cflex_build_debug_print_stats();
-#endif
     const char* input_path  = NULL;
     const char* output_path = NULL;
 
     if ( CFLEX_BUILD_DEBUG )
     {
+        // When debugging is enabled, this function prints sizeof() stats for
+        // internal data types and static data structures.
+        cflex_build_debug_print_stats();
+
         UNUSED( argc );
         UNUSED( argv );
         input_path  = "F:/C/cflex/cflex/src/program";
@@ -97,7 +97,7 @@ main( int argc, char** argv )
         }
     }
 
-    print_fmt( "Cflexbuild Reflection Generator\n" );
+    print_fmt( "CFlex Build Reflection Generator\n" );
     print_fmt( "Input Path: %s\n", input_path );
     print_fmt( "Output Path: %s\n", output_path );
 
@@ -112,20 +112,18 @@ main( int argc, char** argv )
         file_print_fmt( f, "Cflexbuild Reflection Generator\n" );
         file_print_fmt( f, "Input Path: %s\n", input_path );
         file_print_fmt( f, "Output Path: %s\n", output_path );
-
         fclose( f );
     }
 
     // 1. Scan for files
     print_fmt( "Scanning for header files in %s...\n", input_path );
-
-    find_header_files( input_path, &header_files );
+    scan_for_files( input_path, &header_files );
     print_fmt( "Found %d header file(s).\n\n", header_files.count );
 
     // 2. Parse files
-    for ( int i = 0; i < header_files.count; ++i )
+    for ( int32_t i = 0; i < header_files.count; ++i )
     {
-        if ( !parse_header_file( header_files.files[ i ], &parsed_data ) )
+        if ( parse_header_file( header_files.files[ i ], &parsed_data ) == false )
         {
             file_print_fmt( stderr, "Error parsing file, aborting.\n" );
             return 1;

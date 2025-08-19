@@ -11,12 +11,13 @@
 
 // Scans a directory for all files and subdirectories, populating the file_list.
 // This function is implemented with platform-specific code for Windows and POSIX.
-bool
-scan_directory( const char* path, file_list_t* file_list )
+static bool
+platform_scan_directory( const char* path, file_list_t* file_list )
 {
     file_list->count = 0;
 
 #ifdef _WIN32
+
     char search_path[ MAX_PATH_LENGTH ];
     str_print_fmt( search_path, sizeof( search_path ), "%s\\*", path );
 
@@ -48,7 +49,9 @@ scan_directory( const char* path, file_list_t* file_list )
     while ( FindNextFileA( h_find, &find_data ) != 0 );
 
     FindClose( h_find );
+
 #else    // POSIX
+
     DIR* dir = opendir( path );
     if ( dir == NULL )
     {
@@ -76,6 +79,7 @@ scan_directory( const char* path, file_list_t* file_list )
     }
 
     closedir( dir );
+
 #endif
 
     return true;

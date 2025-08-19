@@ -79,7 +79,7 @@ print_fmt( const char* format, ... )
 }
 
 int
-str_print_fmt( char* str, size_t size, const char* format, ... )
+str_print_fmt( char* str, int32_t size, const char* format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -91,13 +91,13 @@ str_print_fmt( char* str, size_t size, const char* format, ... )
 // --- stdlib.h ---
 
 void*
-mem_alloc( size_t size )
+mem_alloc( int32_t size )
 {
     return malloc( size );
 }
 
 void*
-mem_calloc( size_t num, size_t size )
+mem_calloc( int32_t num, int32_t size )
 {
     return calloc( num, size );
 }
@@ -111,77 +111,86 @@ mem_free( void* ptr )
 // --- string.h ---
 
 void*
-mem_copy( void* dest, const void* src, size_t n )
+mem_copy( void* dest, const void* src, int32_t n )
 {
     return memcpy( dest, src, n );
 }
 
 void*
-mem_set( void* s, int c, size_t n )
+mem_set( void* s, int c, int32_t n )
 {
     return memset( s, c, n );
 }
 
-int
+// Compare two null-terminated strings lexicographically
+int32_t
 str_cmp( const char* s1, const char* s2 )
 {
     return strcmp( s1, s2 );
 }
 
-int
-str_ncmp( const char* s1, const char* s2, size_t n )
+// Compare up to n characters of two strings lexicographically
+int32_t
+str_ncmp( const char* s1, const char* s2, int32_t n )
 {
     return strncmp( s1, s2, n );
 }
 
-size_t
+// Return the length of a string as a 32-bit integer
+int32_t
 str_len( const char* s )
 {
-    return strlen( s );
+    return (int32_t)strlen( s );
 }
 
+// Copy a null-terminated string from src to dest
 char*
 str_cpy( char* dest, const char* src )
 {
     return strcpy( dest, src );
 }
 
+// Copy up to n characters from src to dest
 char*
-str_ncpy( char* dest, const char* src, size_t n )
+str_ncpy( char* dest, const char* src, int32_t n )
 {
     return strncpy( dest, src, n );
 }
 
+// Append src to the end of dest
 char*
 str_cat( char* dest, const char* src )
 {
     return strcat( dest, src );
 }
 
+// Append up to n characters of src to the end of dest
 char*
-str_ncat( char* dest, const char* src, size_t n )
+str_ncat( char* dest, const char* src, int32_t n )
 {
     return strncat( dest, src, n );
 }
 
+// Locate the first occurrence of character c in string s
 char*
 str_chr( const char* s, int c )
 {
     return strchr( s, c );
 }
 
+// Locate the last occurrence of character c in string s
 char*
 str_rchr( const char* s, int c )
 {
     return strrchr( s, c );
 }
 
+// Locate the first occurrence of substring needle in haystack
 char*
 str_str( const char* haystack, const char* needle )
 {
     return strstr( haystack, needle );
 }
-
 // --- string.h (extended) ---
 
 // Safely copies a null-terminated string from src to dst.
@@ -198,7 +207,7 @@ str_copy( char* dst, const char* src, int32_t dst_size )
 // Safely copies at most `len` characters from src to dst.
 // Ensures the destination buffer is always null-terminated.
 void
-substr_copy( char* dst, const char* src, int32_t len, int32_t dst_size )
+str_copy_sub( char* dst, const char* src, int32_t len, int32_t dst_size )
 {
     if ( dst_size == 0 )
         return;
@@ -219,4 +228,21 @@ str_left_trim( const char* str )
 {
     while ( *str && char_is_space( (unsigned char)*str ) ) { str++; }
     return str;
+}
+
+// Simple helper to check if a string ends with a suffix.
+bool
+str_ends_with( const char* str, const char* suffix )
+{
+    if ( !str || !suffix )
+    {
+        return false;
+    }
+    int32_t s_len   = str_len( str );
+    int32_t suf_len = str_len( suffix );
+    if ( suf_len > s_len )
+    {
+        return false;
+    }
+    return str_ncmp( str + s_len - suf_len, suffix, suf_len ) == 0;
 }

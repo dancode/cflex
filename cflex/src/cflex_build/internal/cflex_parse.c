@@ -4,11 +4,6 @@
 // It is not a full C parser; it only looks for specific patterns (`CF_STRUCT()`,
 // `CF_ENUM()`) and parses the `typedef struct` and `typedef enum` that follow.
 
-#define FILE_BUFFER_SIZE ( 1024 * 1024 )    // 1MB buffer for file content
-// A static buffer to hold the entire content of a header file.
-// Using a static variable avoids allocating a large buffer on the stack.
-static char file_buffer[ FILE_BUFFER_SIZE ];
-
 // --- Forward Declarations for Parsers ---
 static const char* parse_struct( const char* cursor, parsed_data_t* data );
 static const char* parse_enum( const char* cursor, parsed_data_t* data );
@@ -20,10 +15,10 @@ static const char* parse_enum( const char* cursor, parsed_data_t* data );
 // The identifier is written into the `buffer`, and the cursor is advanced
 // past the identifier.
 static const char*
-read_identifier( const char* cursor, char* buffer, size_t buffer_size )
+read_identifier( const char* cursor, char* buffer, int32_t buffer_size )
 {
-    cursor   = str_left_trim( cursor );
-    size_t i = 0;
+    cursor    = str_left_trim( cursor );
+    int32_t i = 0;
     while ( *cursor && char_is_identifier( *cursor ) && i < buffer_size - 1 ) { buffer[ i++ ] = *cursor++; }
     buffer[ i ] = '\0';
     return cursor;
@@ -31,13 +26,21 @@ read_identifier( const char* cursor, char* buffer, size_t buffer_size )
 
 // --- Main Parsing Logic ---
 
+#define FILE_BUFFER_SIZE ( 1024 * 1024 )    // 1MB buffer for file content
+
+// A static buffer to hold the entire content of a header file.
+// Using a static variable avoids allocating a large buffer on the stack.
+static char file_buffer[ FILE_BUFFER_SIZE ];
+
 // Parses a single header file for reflection data.
 // It reads the entire file into a buffer, then scans for `CF_STRUCT` and
 // `CF_ENUM` annotations, dispatching to the appropriate parser.
-bool
+
+static bool
 parse_header_file( const char* filepath, parsed_data_t* data )
 {
     // Read the entire file into the static file_buffer.
+
     FILE* fp = fopen( filepath, "r" );
     if ( !fp )
     {
@@ -50,43 +53,55 @@ parse_header_file( const char* filepath, parsed_data_t* data )
     fclose( fp );
 
     const char* cursor = file_buffer;
+    const char* end    = file_buffer + bytes_read;
 
     while ( *cursor )
     {
-        const char* next_struct     = str_str( cursor, "CF_STRUCT()" );
-        const char* next_enum       = str_str( cursor, "CF_ENUM()" );
-
-        const char* next_annotation = NULL;
-        bool        is_struct       = false;
-
-        if ( next_struct && ( !next_enum || next_struct < next_enum ) )
+        // Find the next 'C' using memchr to skip irrelevant characters
+        size_t      remaining = (size_t)( end - cursor );
+        const char* next_c    = memchr( cursor, 'C', remaining );
+        if ( next_c == NULL )
         {
-            next_annotation = next_struct;
-            is_struct       = true;
+            break;    // No more annotations
         }
-        else if ( next_enum )
+
+        cursor = next_c;
+
+        // Quick first-three-character check (for optimization to avoid str_ncmp)
+        if ( cursor + 2 < end && cursor[ 1 ] == 'F' && cursor[ 2 ] == '_' )
         {
-            next_annotation = next_enum;
-            is_struct       = false;
+            const char* suffix = cursor + 3;
+
+            // Hard coded branch less comparison.
+            bool is_struct = suffix[ 0 ] == 'S' && suffix[ 1 ] == 'T' && suffix[ 2 ] == 'R' &&
+                             suffix[ 3 ] == 'U' && suffix[ 4 ] == 'C' && suffix[ 5 ] == 'T' &&
+                             suffix[ 6 ] == '(' && suffix[ 7 ] == ')';
+
+            bool is_enum = suffix[ 0 ] == 'E' && suffix[ 1 ] == 'N' && suffix[ 2 ] == 'U' &&
+                           suffix[ 3 ] == 'M' && suffix[ 4 ] == '(' && suffix[ 5 ] == ')';
+
+            // Function pointer to the correct parser (or NULL if no match)
+            // (branchless parser selection using a single function pointer assignment)
+            const char* ( *parser )( const char*, parsed_data_t* ) = is_struct ? parse_struct
+                                                                     : is_enum ? parse_enum
+                                                                               : NULL;
+            if ( parser == NULL )
+            {
+                cursor += 3;    // If "CF_" but not a recognized tag, skip past it.
+                continue;
+            }
+
+            int32_t advance = is_struct ? 8 : 6;    // length of "STRUCT()" or "ENUM()"
+            cursor          = parser( suffix + advance, data );
+            if ( !cursor )
+            {
+                file_print_fmt( stderr, "Error parsing file %s. Aborting.\n", filepath );
+                return false;
+            }
         }
         else
         {
-            break;    // No more annotations found
-        }
-
-        if ( is_struct )
-        {
-            cursor = parse_struct( next_annotation + str_len( "CF_STRUCT()" ), data );
-        }
-        else
-        {
-            cursor = parse_enum( next_annotation + str_len( "CF_ENUM()" ), data );
-        }
-
-        if ( !cursor )
-        {
-            file_print_fmt( stderr, "Error parsing file %s. Aborting.\n", filepath );
-            return false;
+            cursor++;    // Not "CF_", skip one char
         }
     }
 
@@ -97,6 +112,7 @@ parse_header_file( const char* filepath, parsed_data_t* data )
 
 // Parses a `typedef struct` block, expecting it to follow a `CF_STRUCT()` annotation.
 // It extracts the struct's name and any fields marked with `CF_FIELD()`.
+
 static const char*
 parse_struct( const char* cursor, parsed_data_t* data )
 {
@@ -104,7 +120,10 @@ parse_struct( const char* cursor, parsed_data_t* data )
 
     // Expect "typedef struct"
     if ( str_ncmp( cursor, "typedef struct", 14 ) != 0 )
+    {
         return cursor;
+    }
+
     cursor += 14;
     cursor = str_left_trim( cursor );
 
@@ -171,6 +190,7 @@ parse_struct( const char* cursor, parsed_data_t* data )
 
 // Parses a `typedef enum` block, expecting it to follow a `CF_ENUM()` annotation.
 // It extracts the enum's name and all of its values.
+
 static const char*
 parse_enum( const char* cursor, parsed_data_t* data )
 {
