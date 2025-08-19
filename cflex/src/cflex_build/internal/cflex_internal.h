@@ -5,6 +5,7 @@
 // It contains forward declarations for all functions and data structures
 // used across the different internal modules.
 
+// A macro to suppress unused variable warnings.
 #define UNUSED( x ) ( (void)x )
 
 // -----------------------------------------------------------------------------
@@ -13,6 +14,7 @@
 #define MAX_FILES       1024
 #define MAX_PATH_LENGTH 1024
 
+// Holds a list of file paths.
 typedef struct file_list_t
 {
     char files[ MAX_FILES ][ MAX_PATH_LENGTH ];
@@ -50,34 +52,41 @@ void find_header_files( const char* path, file_list_t* header_files );
 #define MAX_ENUM_VALUES 128
 #define MAX_USER_TYPES  128
 
+// Represents a single field within a parsed struct.
 typedef struct parsed_field_t
 {
     char type_name[ MAX_NAME_LENGTH ];
     char name[ MAX_NAME_LENGTH ];
 } parsed_field_t;
 
+// Represents a single value within a parsed enum.
 typedef struct parsed_enum_value_t
 {
     char name[ MAX_NAME_LENGTH ];
 } parsed_enum_value_t;
 
+// Discriminator for the parsed_type_t union.
 typedef enum parsed_kind_t
 {
     PARSED_KIND_STRUCT,
     PARSED_KIND_ENUM
 } parsed_kind_t;
 
+// Represents a single parsed type (either a struct or an enum).
+// This is a tagged union, with `kind` as the discriminator.
 typedef struct parsed_type_t
 {
     parsed_kind_t kind;
     char          name[ MAX_NAME_LENGTH ];
     union
     {
+        // Information specific to structs.
         struct
         {
             parsed_field_t fields[ MAX_FIELDS ];
             int            num_fields;
         } struct_info;
+        // Information specific to enums.
         struct
         {
             parsed_enum_value_t values[ MAX_ENUM_VALUES ];
@@ -86,7 +95,7 @@ typedef struct parsed_type_t
     };
 } parsed_type_t;
 
-// A global structure to hold all parsed data from all files
+// A structure to hold all parsed reflection data from all processed files.
 typedef struct parsed_data_t
 {
     parsed_type_t types[ MAX_USER_TYPES ];

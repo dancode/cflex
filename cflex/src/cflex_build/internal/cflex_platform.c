@@ -9,6 +9,8 @@
 #    include <sys/stat.h>
 #endif
 
+// Scans a directory for all files and subdirectories, populating the file_list.
+// This function is implemented with platform-specific code for Windows and POSIX.
 bool
 scan_directory( const char* path, file_list_t* file_list )
 {

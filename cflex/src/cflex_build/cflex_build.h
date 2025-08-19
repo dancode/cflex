@@ -2,6 +2,6 @@
 #define CFLEX_BUILD_H
 
 // output debug information
-#define CFLEX_BUILD_DEBUG 0
+#define CFLEX_BUILD_DEBUG 1
 
 #endif    // CFLEX_BUILD_H

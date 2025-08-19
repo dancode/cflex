@@ -1,4 +1,5 @@
-// Fixes path separators for cross-platform compatibility.
+// Ensures that the path separators in a file path are correct for the current OS.
+// For example, it will replace all '/' with '\' on Windows.
 void
 fix_path_separators( char* path )
 {
@@ -40,8 +41,12 @@ ends_with( const char* str, const char* suffix )
     return str_ncmp( str + s_len - suf_len, suffix, suf_len ) == 0;
 }
 
+// A temporary, static buffer to hold all files found in the initial directory scan.
+// Using a static variable avoids allocating a large structure on the stack.
 static file_list_t all_files;
 
+// Scans the given path for all files, then filters them to find only files
+// ending with the ".h" extension. The results are stored in `header_files`.
 void
 find_header_files( const char* path, file_list_t* header_files )
 {

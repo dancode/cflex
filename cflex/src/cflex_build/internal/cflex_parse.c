@@ -1,4 +1,12 @@
+// This file contains the core logic for parsing C header files to extract
+// reflection data. The parser is a simple, hand-written recursive descent
+// parser. It operates on a single file's content loaded into a memory buffer.
+// It is not a full C parser; it only looks for specific patterns (`CF_STRUCT()`,
+// `CF_ENUM()`) and parses the `typedef struct` and `typedef enum` that follow.
+
 #define FILE_BUFFER_SIZE ( 1024 * 1024 )    // 1MB buffer for file content
+// A static buffer to hold the entire content of a header file.
+// Using a static variable avoids allocating a large buffer on the stack.
 static char file_buffer[ FILE_BUFFER_SIZE ];
 
 // --- Forward Declarations for Parsers ---
@@ -7,7 +15,10 @@ static const char* parse_enum( const char* cursor, parsed_data_t* data );
 
 // --- Helper Functions ---
 
-// Reads a C identifier from the cursor into the buffer.
+// Reads a C identifier (e.g., variable name, type name) from the cursor.
+// An identifier is a sequence of alphanumeric characters and underscores.
+// The identifier is written into the `buffer`, and the cursor is advanced
+// past the identifier.
 static const char*
 read_identifier( const char* cursor, char* buffer, size_t buffer_size )
 {
@@ -20,9 +31,13 @@ read_identifier( const char* cursor, char* buffer, size_t buffer_size )
 
 // --- Main Parsing Logic ---
 
+// Parses a single header file for reflection data.
+// It reads the entire file into a buffer, then scans for `CF_STRUCT` and
+// `CF_ENUM` annotations, dispatching to the appropriate parser.
 bool
 parse_header_file( const char* filepath, parsed_data_t* data )
 {
+    // Read the entire file into the static file_buffer.
     FILE* fp = fopen( filepath, "r" );
     if ( !fp )
     {
@@ -80,11 +95,14 @@ parse_header_file( const char* filepath, parsed_data_t* data )
 
 // --- Type-Specific Parsers ---
 
+// Parses a `typedef struct` block, expecting it to follow a `CF_STRUCT()` annotation.
+// It extracts the struct's name and any fields marked with `CF_FIELD()`.
 static const char*
 parse_struct( const char* cursor, parsed_data_t* data )
 {
     cursor = str_left_trim( cursor );
 
+    // Expect "typedef struct"
     if ( str_ncmp( cursor, "typedef struct", 14 ) != 0 )
         return cursor;
     cursor += 14;
@@ -151,11 +169,14 @@ parse_struct( const char* cursor, parsed_data_t* data )
     return cursor;
 }
 
+// Parses a `typedef enum` block, expecting it to follow a `CF_ENUM()` annotation.
+// It extracts the enum's name and all of its values.
 static const char*
 parse_enum( const char* cursor, parsed_data_t* data )
 {
     cursor = str_left_trim( cursor );
 
+    // Expect "typedef enum"
     if ( str_ncmp( cursor, "typedef enum", 12 ) != 0 )
         return cursor;
     cursor += 12;

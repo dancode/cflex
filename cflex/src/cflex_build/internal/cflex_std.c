@@ -1,6 +1,14 @@
-//
-// cflex_std.c - This file will contain wrapper functions for C standard library functions.
-//
+// --- Standard Library Wrappers ---
+// The cflex_build tool uses wrappers around standard C library functions.
+// This is done for several reasons:
+// 1. Consistency: Provides a consistent API within the cflex_build codebase.
+// 2. Safety: Allows for the future addition of enhanced error checking or
+//    safer alternatives (e.g., bounds-checked string operations).
+// 3. Portability: While not a primary goal for this tool, it abstracts away
+//    the standard library, which can make porting to different platforms or
+//    compilers easier in the future.
+// 4. Extensibility: Custom logic, such as memory tracking or logging, can be
+//    easily added to these wrappers.
 #include "cflex_internal.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -176,6 +184,8 @@ str_str( const char* haystack, const char* needle )
 
 // --- string.h (extended) ---
 
+// Safely copies a null-terminated string from src to dst.
+// Ensures the destination buffer is always null-terminated.
 void
 str_copy( char* dst, const char* src, int32_t dst_size )
 {
@@ -185,6 +195,8 @@ str_copy( char* dst, const char* src, int32_t dst_size )
     dst[ dst_size - 1 ] = '\0';
 }
 
+// Safely copies at most `len` characters from src to dst.
+// Ensures the destination buffer is always null-terminated.
 void
 substr_copy( char* dst, const char* src, int32_t len, int32_t dst_size )
 {
@@ -201,6 +213,7 @@ substr_copy( char* dst, const char* src, int32_t len, int32_t dst_size )
     dst[ copy_len ] = '\0';
 }
 
+// Returns a pointer to the first non-whitespace character in a string.
 const char*
 str_left_trim( const char* str )
 {
