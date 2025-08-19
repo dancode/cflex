@@ -60,7 +60,7 @@ platform_scan_directory( const char* path, file_list_t* file_list )
     DIR* dir = opendir( path );
     if ( dir == NULL )
     {
-        print_fprintf( stderr, "Error: Could not open directory %s\n", path );
+        file_print_fmt( stderr, "Error: Could not open directory %s\n", path );
         return false;
     }
 
@@ -71,13 +71,13 @@ platform_scan_directory( const char* path, file_list_t* file_list )
         {
             if ( file_list->count < MAX_FILES )
             {
-                print_snprintf( file_list->files[ file_list->count ], MAX_PATH_LENGTH, "%s/%s", path,
+                str_print_fmt( file_list->files[ file_list->count ], MAX_PATH_LENGTH, "%s/%s", path,
                                 entry->d_name );
                 file_list->count++;
             }
             else
             {
-                print_fprintf( stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES );
+                file_print_fmt( stderr, "Warning: Exceeded max file limit of %d\n", MAX_FILES );
                 break;
             }
         }
