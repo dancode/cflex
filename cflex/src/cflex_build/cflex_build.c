@@ -86,30 +86,24 @@ main( int argc, char** argv )
     const char* input_path  = NULL;
     const char* output_path = NULL;
 
-    if ( CFLEX_BUILD_DEBUG )
-    {
-        // When debugging is enabled, this function prints sizeof() stats for
-        // internal data types and static data structures.
-        cflex_build_debug_print_stats();
+#if CFLEX_BUILD_DEBUG
+    // When debugging is enabled, this function prints sizeof() stats for
+    // internal data types and static data structures.
+    cflex_build_debug_print_stats();
 
-        UNUSED( argc );
-        UNUSED( argv );
-        input_path  = "F:/C/cflex/cflex/src/program";
-        output_path = "F:/C/cflex/cflex/build/cflex_generated";
-    }
-    else
+    UNUSED( argc );
+    UNUSED( argv );
+    input_path  = "F:/C/cflex/cflex/src/program";
+    output_path = "F:/C/cflex/cflex/build/cflex_generated";
+#else
+    if ( argc < 3 )
     {
-        input_path  = argv[ 1 ];
-        output_path = argv[ 2 ];
-        if ( argc < 3 )
-        {
-            if ( 0 )
-            {
-                file_print_fmt( stderr, "Usage: %s <input_path> <output_path>\n", argv[ 0 ] );
-                return 1;
-            }
-        }
+        file_print_fmt( stderr, "Usage: %s <input_path> <output_path>\n", argv[ 0 ] );
+        return 1;
     }
+    input_path  = argv[ 1 ];
+    output_path = argv[ 2 ];
+#endif
 
     print_fmt( "CFlex Build Reflection Generator\n" );
     print_fmt( "Input Path: %s\n", input_path );

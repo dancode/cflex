@@ -117,21 +117,30 @@ add_executable(program
     ${GENERATED_FILES}
 )
 
-# The program only needs to include headers from its own source directory.
-# The other necessary include paths will be inherited from the cflex library.
-target_include_directories(program PRIVATE 
-    src/program    
+target_include_directories(program PRIVATE
+    src/program
     ${GENERATED_DIR}
 )
 
-# Link the program against the cflex library. This transitively applies the
-# include directories from cflex to the program, which is a more robust way
-# of managing dependencies for IDEs and build systems.
 target_link_libraries(program PRIVATE cflex)
-
-# Crucially, the 'program' target must depend on the 'generate_reflection' target.
-# This ensures that the generated files are created *before* the program is compiled.
 add_dependencies(program generate_reflection)
+
+# --- Unit Test Application ---
+add_executable(cflex_unit
+    src/cflex_unit/cflex_unit.c
+    ${LIB_HEADER_FILES}
+    ${GENERATED_FILES}
+)
+
+target_include_directories(cflex_unit PRIVATE
+    src/program # For program.h
+    src/cflex_unit
+    ${GENERATED_DIR}
+)
+
+target_link_libraries(cflex_unit PRIVATE cflex)
+add_dependencies(cflex_unit generate_reflection)
+
 
 # Since cflex_generated.c is included directly by cflex_implementation.h,
 # we must tell CMake not to compile it as a separate translation unit,
@@ -139,10 +148,10 @@ add_dependencies(program generate_reflection)
 # Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
 set_source_files_properties(${GENERATED_C} PROPERTIES HEADER_FILE_ONLY ON)
 
-
 # --- IDE File Organization ---
 # Organize application and library files in the IDE to mirror the directory structure.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "cflex_unit" FILES src/cflex_unit/cflex_unit.c)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
 source_group(TREE ${GENERATED_DIR} PREFIX "cflex_generated" FILES ${GENERATED_FILES})
 
@@ -150,5 +159,5 @@ source_group(TREE ${GENERATED_DIR} PREFIX "cflex_generated" FILES ${GENERATED_FI
 # --- Optional: Installation ---
 # This section provides rules for installing the final application and the library header.
 # It is commented out but serves as a good practice example.
-# install(TARGETS program DESTINATION bin)
+# install(TARGETS program cflex_unit DESTINATION bin)
 # install(FILES src/cflex/cflex.h DESTINATION include)

@@ -39,6 +39,22 @@ print_type_details( const cf_type_t* type )
     }
 }
 
+void
+print_all_types()
+{
+    const cf_type_t** types;
+    int32_t           count;
+    cf_get_all_types( &types, &count );
+
+    printf( "--- All Registered Types (%d) ---\n", count );
+    for ( int32_t i = 0; i < count; ++i )
+    {
+        print_type_details( types[ i ] );
+        printf( "\n" );
+    }
+    printf( "---------------------------------\n" );
+}
+
 int
 main( int argc, char** argv )
 {
@@ -69,6 +85,11 @@ main( int argc, char** argv )
     printf( "Searching for type by ID: CF_TYPE_ID_PLAYER_T...\n" );
     const cf_type_t* player_by_id = cf_find_type_by_id( CF_TYPE_ID_PLAYER_T );
     print_type_details( player_by_id );
+    printf( "\n" );
+
+    // --- New ---
+    // Print all types in the system
+    print_all_types();
 
     return 0;
 }
