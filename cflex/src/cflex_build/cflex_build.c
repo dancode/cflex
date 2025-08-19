@@ -27,12 +27,52 @@ static file_list_t   header_files = { 0 };
 static parsed_data_t parsed_data  = { 0 };
 
 // -----------------------------------------------------------------------------
-// TODO: explain thie build process...
+// cflex_build - Reflection Data Generator
 // -----------------------------------------------------------------------------
+// This tool is a pre-build step for projects using the cflex reflection library.
+// It performs the following steps:
+//
+// 1. Scans a specified input directory for C header files (`.h`).
+// 2. Parses these header files to find `struct` and `enum` definitions that
+//    are marked up with `CFLEX_` macros.
+// 3. Collects information about these types, such as their names, fields,
+//    and enum values.
+// 4. Generates two files in the specified output directory:
+//    - `cflex_generated.h`: A header file containing the generated reflection
+//      data structures.
+//    - `cflex_generated.c`: A source file containing the implementation for
+//      the reflection data.
+//
+// This generated code can then be compiled and linked into the main
+// application, providing runtime access to type information.
+// -----------------------------------------------------------------------------
+
+#if CFLEX_BUILD_DEBUG
+// Prints sizeof() stats for internal data types and static data structures.
+// This provides a quick overview of the memory footprint of the tool's data.
+static void cflex_build_debug_print_stats()
+{
+    print_fmt("--- cflex_build debug stats ---\n");
+    print_fmt("sizeof(file_list_t) = %zu\n", sizeof(file_list_t));
+    print_fmt("sizeof(parsed_field_t) = %zu\n", sizeof(parsed_field_t));
+    print_fmt("sizeof(parsed_enum_value_t) = %zu\n", sizeof(parsed_enum_value_t));
+    print_fmt("sizeof(parsed_type_t) = %zu\n", sizeof(parsed_type_t));
+    print_fmt("sizeof(parsed_data_t) = %zu\n", sizeof(parsed_data_t));
+    print_fmt("\n");
+    print_fmt("sizeof(static file_list_t header_files) = %zu\n", sizeof(header_files));
+    print_fmt("sizeof(static parsed_data_t parsed_data) = %zu\n", sizeof(parsed_data));
+    print_fmt("--- end cflex_build debug stats ---\n\n");
+}
+#endif
 
 int
 main( int argc, char** argv )
 {
+#if CFLEX_BUILD_DEBUG
+    // When debugging is enabled, this function prints sizeof() stats for
+    // internal data types and static data structures.
+    cflex_build_debug_print_stats();
+#endif
     const char* input_path  = NULL;
     const char* output_path = NULL;
 

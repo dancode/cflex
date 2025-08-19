@@ -46,6 +46,9 @@ get_cf_type_name( const char* c_name )
     return c_name;
 }
 
+// Generates the content of the `cflex_generated.h` file.
+// This file contains the `cf_type_id_t` enum, which provides a unique ID
+// for each reflected type.
 static void
 generate_h_file( FILE* fp, const parsed_data_t* data )
 {
@@ -70,6 +73,12 @@ generate_h_file( FILE* fp, const parsed_data_t* data )
     file_print_fmt( fp, "#endif // CFLEX_GENERATED_H\n" );
 }
 
+// Generates the content of the `cflex_generated.c` file.
+// This file contains the actual reflection data, including:
+// - `cf_type_t` instances for each primitive and user-defined type.
+// - `cf_field_t` arrays for structs.
+// - `cf_enum_value_t` arrays for enums.
+// - A global array of pointers to all `cf_type_t` instances.
 static void
 generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers )
 {
@@ -183,6 +192,9 @@ generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers
 
 // --- Public API ---
 
+// Main entry point for the output generation module.
+// It takes the parsed data and generates the cflex_generated.h and
+// cflex_generated.c files in the specified output path.
 bool
 generate_output_files( const char* output_path, const parsed_data_t* data, const file_list_t* headers )
 {
