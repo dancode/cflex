@@ -25,8 +25,10 @@
 #include "internal/cflex_output.c"
 
 // --- Global State ---
+
 // These are large data structures, so we make them static globals
 // to avoid blowing the stack in main().
+
 static file_list_t   header_files = { 0 };
 static parsed_data_t parsed_data  = { 0 };
 
@@ -51,9 +53,13 @@ static parsed_data_t parsed_data  = { 0 };
 // application, providing runtime access to type information.
 // -----------------------------------------------------------------------------
 
+/*============================================================================================*/
+
 #if CFLEX_BUILD_DEBUG
+
 // Prints sizeof() stats for internal data types and static data structures.
 // This provides a quick overview of the memory footprint of the tool's data.
+
 static void
 cflex_build_debug_print_stats()
 {
@@ -68,7 +74,11 @@ cflex_build_debug_print_stats()
     print_fmt( "sizeof(static parsed_data_t parsed_data) = %zu\n", sizeof( parsed_data ) );
     print_fmt( "--- end cflex_build debug stats ---\n\n" );
 }
+
 #endif
+
+/*============================================================================================*/
+
 
 int
 main( int argc, char** argv )
@@ -105,8 +115,9 @@ main( int argc, char** argv )
     print_fmt( "Input Path: %s\n", input_path );
     print_fmt( "Output Path: %s\n", output_path );
 
-    if ( CFLEX_BUILD_DEBUG )    // debug output when generator runs.
+    if ( CFLEX_BUILD_DEBUG )
     {
+        // produce debug output when generator runs.
         FILE* f = fopen( "log.txt", "w" );
         if ( !f )
         {
@@ -143,3 +154,5 @@ main( int argc, char** argv )
 
     return 0;
 }
+
+/*============================================================================================*/

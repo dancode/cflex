@@ -1,3 +1,5 @@
+/*============================================================================================*/
+
 #ifdef _WIN32
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN 1
@@ -9,8 +11,11 @@
 #    include <sys/stat.h>
 #endif
 
+/*============================================================================================*/
+
 // Scans a directory for all files and subdirectories, populating the file_list.
 // This function is implemented with platform-specific code for Windows and POSIX.
+
 static bool
 platform_scan_directory( const char* path, file_list_t* file_list )
 {
@@ -84,3 +89,5 @@ platform_scan_directory( const char* path, file_list_t* file_list )
 
     return true;
 }
+
+/*============================================================================================*/

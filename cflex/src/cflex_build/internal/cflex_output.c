@@ -1,4 +1,8 @@
-// --- Private Helper Functions ---
+/*==============================================================================================
+
+    Output
+
+==============================================================================================*/
 
 static void
 print_uppercase( FILE* fp, const char* str )
@@ -10,45 +14,39 @@ print_uppercase( FILE* fp, const char* str )
     }
 }
 
+/*============================================================================================*/
+
 // Maps a C type name to the name used for the cf_type_t variable.
+
 static const char*
 get_cf_type_name( const char* c_name )
 {
-    if ( str_cmp( c_name, "void" ) == 0 )
-        return "void";
-    if ( str_cmp( c_name, "bool" ) == 0 )
-        return "bool";
-    if ( str_cmp( c_name, "char" ) == 0 )
-        return "char";
-    if ( str_cmp( c_name, "int8_t" ) == 0 )
-        return "i8";
-    if ( str_cmp( c_name, "int16_t" ) == 0 )
-        return "i16";
-    if ( str_cmp( c_name, "int32_t" ) == 0 )
-        return "i32";
-    if ( str_cmp( c_name, "int64_t" ) == 0 )
-        return "i64";
-    if ( str_cmp( c_name, "uint8_t" ) == 0 )
-        return "u8";
-    if ( str_cmp( c_name, "uint16_t" ) == 0 )
-        return "u16";
-    if ( str_cmp( c_name, "uint32_t" ) == 0 )
-        return "u32";
-    if ( str_cmp( c_name, "uint64_t" ) == 0 )
-        return "u64";
-    if ( str_cmp( c_name, "float" ) == 0 )
-        return "f32";
-    if ( str_cmp( c_name, "double" ) == 0 )
-        return "f64";
-    if ( str_cmp( c_name, "const char*" ) == 0 )
-        return "cstr";
-    // If not a primitive, it's a user-defined type. The name is the same.
-    return c_name;
+    // clang-format off
+    if ( str_cmp( c_name, "void" ) == 0 ) return "void";
+    if ( str_cmp( c_name, "bool" ) == 0 ) return "bool";
+    if ( str_cmp( c_name, "char" ) == 0 ) return "char";
+    if ( str_cmp( c_name, "int8_t" ) == 0 ) return "i8";
+    if ( str_cmp( c_name, "int16_t" ) == 0 ) return "i16";
+    if ( str_cmp( c_name, "int32_t" ) == 0 ) return "i32";
+    if ( str_cmp( c_name, "int64_t" ) == 0 ) return "i64";
+    if ( str_cmp( c_name, "uint8_t" ) == 0 ) return "u8";
+    if ( str_cmp( c_name, "uint16_t" ) == 0 ) return "u16";
+    if ( str_cmp( c_name, "uint32_t" ) == 0 ) return "u32";
+    if ( str_cmp( c_name, "uint64_t" ) == 0 ) return "u64";
+    if ( str_cmp( c_name, "float" ) == 0 ) return "f32";
+    if ( str_cmp( c_name, "double" ) == 0 ) return "f64";
+    if ( str_cmp( c_name, "const char*" ) == 0 ) return "cstr";    
+    // clang-format om
+        
+    return c_name; // If not a primitive, it's a user-defined type. The name is the same.
 }
+
+/*============================================================================================*/
 
 // Generates the content of the `cflex_generated.h` file.
 // This file contains the `cf_type_id_t` enum, which provides a unique ID
 // for each reflected type.
+
 static void
 generate_h_file( FILE* fp, const parsed_data_t* data )
 {
@@ -57,10 +55,11 @@ generate_h_file( FILE* fp, const parsed_data_t* data )
     file_print_fmt( fp, "#define CFLEX_GENERATED_H\n\n" );
     file_print_fmt( fp, "typedef enum cf_type_id_t {\n" );
     file_print_fmt( fp, "    CF_TYPE_ID_VOID, CF_TYPE_ID_BOOL, CF_TYPE_ID_CHAR, CF_TYPE_ID_I8,\n" );
-    file_print_fmt( fp, "    CF_TYPE_ID_I16, CF_TYPE_ID_I32, CF_TYPE_ID_I64, CF_TYPE_ID_U8,\n" );
-    file_print_fmt( fp, "    CF_TYPE_ID_U16, CF_TYPE_ID_U32, CF_TYPE_ID_U64, CF_TYPE_ID_F32,\n" );
-    file_print_fmt( fp, "    CF_TYPE_ID_F64, CF_TYPE_ID_CSTR,\n" );
+    file_print_fmt( fp, "    CF_TYPE_ID_I16,  CF_TYPE_ID_I32,  CF_TYPE_ID_I64,  CF_TYPE_ID_U8,\n" );
+    file_print_fmt( fp, "    CF_TYPE_ID_U16,  CF_TYPE_ID_U32,  CF_TYPE_ID_U64,  CF_TYPE_ID_F32,\n" );
+    file_print_fmt( fp, "    CF_TYPE_ID_F64,  CF_TYPE_ID_CSTR,\n" );
 
+    // add all custom reflected types to type enumeration.
     for ( int i = 0; i < data->num_types; ++i )
     {
         file_print_fmt( fp, "    CF_TYPE_ID_" );
@@ -73,12 +72,15 @@ generate_h_file( FILE* fp, const parsed_data_t* data )
     file_print_fmt( fp, "#endif // CFLEX_GENERATED_H\n" );
 }
 
+/*============================================================================================*/
+
 // Generates the content of the `cflex_generated.c` file.
 // This file contains the actual reflection data, including:
 // - `cf_type_t` instances for each primitive and user-defined type.
 // - `cf_field_t` arrays for structs.
 // - `cf_enum_value_t` arrays for enums.
 // - A global array of pointers to all `cf_type_t` instances.
+
 static void
 generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers )
 {
@@ -97,50 +99,26 @@ generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers
     file_print_fmt( fp, "\n" );
 
     // Primitives
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_void = { .name = \"void\", .kind = CF_KIND_PRIMITIVE, .size = 0, .align = 0, .prim = CF_PRIM_VOID };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_bool = { .name = \"bool\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(bool), .align = _Alignof(bool), .prim = CF_PRIM_BOOL };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_char = { .name = \"char\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(char), .align = _Alignof(char), .prim = CF_PRIM_CHAR };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_i8 = { .name = \"int8_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(int8_t), .align = _Alignof(int8_t), .prim = CF_PRIM_I8 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_i16 = { .name = \"int16_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(int16_t), .align = _Alignof(int16_t), .prim = CF_PRIM_I16 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_i32 = { .name = \"int32_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(int32_t), .align = _Alignof(int32_t), .prim = CF_PRIM_I32 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_i64 = { .name = \"int64_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(int64_t), .align = _Alignof(int64_t), .prim = CF_PRIM_I64 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_u8 = { .name = \"uint8_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint8_t), .align = _Alignof(uint8_t), .prim = CF_PRIM_U8 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_u16 = { .name = \"uint16_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint16_t), .align = _Alignof(uint16_t), .prim = CF_PRIM_U16 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_u32 = { .name = \"uint32_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint32_t), .align = _Alignof(uint32_t), .prim = CF_PRIM_U32 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_u64 = { .name = \"uint64_t\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint64_t), .align = _Alignof(uint64_t), .prim = CF_PRIM_U64 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_f32 = { .name = \"float\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(float), .align = _Alignof(float), .prim = CF_PRIM_F32 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_f64 = { .name = \"double\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(double), .align = _Alignof(double), .prim = CF_PRIM_F64 };\n" );
-    file_print_fmt(
-        fp,
-        "static const cf_type_t cf_type_cstr = { .name = \"const char*\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(const char*), .align = _Alignof(const char*), .prim = CF_PRIM_CSTR };\n\n" );
+
+    // clang-format off
+    file_print_fmt( fp, "static const cf_type_t cf_type_void = { .name = \"void\",        .kind = CF_KIND_PRIMITIVE, .size = 0,                   .align = 0,                     .prim = CF_PRIM_VOID };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_bool = { .name = \"bool\",        .kind = CF_KIND_PRIMITIVE, .size = sizeof(bool),        .align = _Alignof(bool),        .prim = CF_PRIM_BOOL };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_char = { .name = \"char\",        .kind = CF_KIND_PRIMITIVE, .size = sizeof(char),        .align = _Alignof(char),        .prim = CF_PRIM_CHAR };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_i8   = { .name = \"int8_t\",      .kind = CF_KIND_PRIMITIVE, .size = sizeof(int8_t),      .align = _Alignof(int8_t),      .prim = CF_PRIM_I8 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_i16  = { .name = \"int16_t\",     .kind = CF_KIND_PRIMITIVE, .size = sizeof(int16_t),     .align = _Alignof(int16_t),     .prim = CF_PRIM_I16 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_i32  = { .name = \"int32_t\",     .kind = CF_KIND_PRIMITIVE, .size = sizeof(int32_t),     .align = _Alignof(int32_t),     .prim = CF_PRIM_I32 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_i64  = { .name = \"int64_t\",     .kind = CF_KIND_PRIMITIVE, .size = sizeof(int64_t),     .align = _Alignof(int64_t),     .prim = CF_PRIM_I64 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_u8   = { .name = \"uint8_t\",     .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint8_t),     .align = _Alignof(uint8_t),     .prim = CF_PRIM_U8 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_u16  = { .name = \"uint16_t\",    .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint16_t),    .align = _Alignof(uint16_t),    .prim = CF_PRIM_U16 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_u32  = { .name = \"uint32_t\",    .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint32_t),    .align = _Alignof(uint32_t),    .prim = CF_PRIM_U32 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_u64  = { .name = \"uint64_t\",    .kind = CF_KIND_PRIMITIVE, .size = sizeof(uint64_t),    .align = _Alignof(uint64_t),    .prim = CF_PRIM_U64 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_f32  = { .name = \"float\",       .kind = CF_KIND_PRIMITIVE, .size = sizeof(float),       .align = _Alignof(float),       .prim = CF_PRIM_F32 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_f64  = { .name = \"double\",      .kind = CF_KIND_PRIMITIVE, .size = sizeof(double),      .align = _Alignof(double),      .prim = CF_PRIM_F64 };\n" );
+    file_print_fmt( fp, "static const cf_type_t cf_type_cstr = { .name = \"const char*\", .kind = CF_KIND_PRIMITIVE, .size = sizeof(const char*), .align = _Alignof(const char*), .prim = CF_PRIM_CSTR };\n\n" );
+    // clang-format on
 
     // User types
+
     for ( int i = 0; i < data->num_types; ++i )
     {
         const parsed_type_t* type = &data->types[ i ];
@@ -177,6 +155,7 @@ generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers
     }
 
     // Global type array
+
     file_print_fmt( fp, "const cf_type_t* cf_type_array[] = {\n" );
     file_print_fmt(
         fp,
@@ -189,12 +168,12 @@ generate_c_file( FILE* fp, const parsed_data_t* data, const file_list_t* headers
     file_print_fmt( fp, "const int32_t cf_type_count = sizeof(cf_type_array) / sizeof(cf_type_array[0]);\n" );
 }
 
-
-// --- Public API ---
+/*============================================================================================*/
 
 // Main entry point for the output generation module.
 // It takes the parsed data and generates the cflex_generated.h and
 // cflex_generated.c files in the specified output path.
+
 bool
 generate_output_files( const char* output_path, const parsed_data_t* data, const file_list_t* headers )
 {
@@ -225,3 +204,5 @@ generate_output_files( const char* output_path, const parsed_data_t* data, const
 
     return true;
 }
+
+/*============================================================================================*/

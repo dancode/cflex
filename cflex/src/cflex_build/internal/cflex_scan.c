@@ -1,4 +1,9 @@
-// -----------------------------------------------------------------------------
+/*==============================================================================================
+
+    File Scanner
+
+==============================================================================================*/
+
 // Ensures that the path separators in a file path are correct for the current OS.
 // For example, it will replace all '/' with '\' on Windows.
 
@@ -26,13 +31,15 @@ path_fix_separators( char* path )
     }
 }
 
-// -----------------------------------------------------------------------------
+/*============================================================================================*/
+
 // A temporary, static buffer to hold all files found in the initial directory scan.
 // Using a static variable avoids allocating a large structure on the stack.
 
 static file_list_t all_files = { 0 };
 
-// -----------------------------------------------------------------------------
+/*============================================================================================*/
+
 // Scans the given path for all files, then filters them to find only files
 // ending with the ".h" extension. The results are stored in `header_files`.
 
@@ -64,3 +71,5 @@ scan_for_files( const char* path, file_list_t* header_files )
         }
     }
 }
+
+/*============================================================================================*/

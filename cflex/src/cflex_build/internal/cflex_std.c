@@ -1,14 +1,20 @@
-// --- Standard Library Wrappers ---
-// The cflex_build tool uses wrappers around standard C library functions.
-// This is done for several reasons:
-// 1. Consistency: Provides a consistent API within the cflex_build codebase.
-// 2. Safety: Allows for the future addition of enhanced error checking or
-//    safer alternatives (e.g., bounds-checked string operations).
-// 3. Portability: While not a primary goal for this tool, it abstracts away
-//    the standard library, which can make porting to different platforms or
-//    compilers easier in the future.
-// 4. Extensibility: Custom logic, such as memory tracking or logging, can be
-//    easily added to these wrappers.
+/*==============================================================================================
+
+    Standard Library Wrappers
+    The cflex_build tool uses wrappers around standard C library functions.
+    This is done for several reasons:
+
+    1. Consistency: Provides a consistent API within the cflex_build codebase.
+    2. Safety: Allows for the future addition of enhanced error checking or
+       safer alternatives (e.g., bounds-checked string operations).
+    3. Portability: While not a primary goal for this tool, it abstracts away
+       the standard library, which can make porting to different platforms or
+       compilers easier in the future.
+    4. Extensibility: Custom logic, such as memory tracking or logging, can be
+       easily added to these wrappers.
+
+==============================================================================================*/
+
 #include "cflex_internal.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -16,7 +22,11 @@
 #include <string.h>
 #include <stdarg.h>
 
-// --- ctype.h ---
+/*==============================================================================================
+
+    ctype.h (characters)
+
+==============================================================================================*/
 
 int
 char_is_space( int c )
@@ -56,7 +66,11 @@ char_is_identifier( char c )
     return char_is_alnum( (unsigned char)c ) || c == '_';
 }
 
-// --- stdio.h ---
+/*==============================================================================================
+
+    stdio.h (printing)
+
+==============================================================================================*/
 
 int
 file_print_fmt( FILE* stream, const char* format, ... )
@@ -88,7 +102,11 @@ str_print_fmt( char* str, int32_t size, const char* format, ... )
     return result;
 }
 
-// --- stdlib.h ---
+/*==============================================================================================
+
+    stdlib.h (memory)
+
+==============================================================================================*/
 
 void*
 mem_alloc( int32_t size )
@@ -108,8 +126,6 @@ mem_free( void* ptr )
     free( ptr );
 }
 
-// --- string.h ---
-
 void*
 mem_copy( void* dest, const void* src, int32_t n )
 {
@@ -121,6 +137,12 @@ mem_set( void* s, int c, int32_t n )
 {
     return memset( s, c, n );
 }
+
+/*==============================================================================================
+
+    string.h (strings)
+
+==============================================================================================*/
 
 // Compare two null-terminated strings lexicographically
 int32_t
@@ -246,3 +268,5 @@ str_ends_with( const char* str, const char* suffix )
     }
     return str_ncmp( str + s_len - suf_len, suffix, suf_len ) == 0;
 }
+
+/*============================================================================================*/
