@@ -48,7 +48,6 @@ set_source_files_properties(src/cflex_build/internal/cflex_platform.c PROPERTIES
 set_source_files_properties(src/cflex_build/internal/cflex_scan.c PROPERTIES HEADER_FILE_ONLY ON)
 set_source_files_properties(src/cflex_build/internal/cflex_parse.c PROPERTIES HEADER_FILE_ONLY ON)
 set_source_files_properties(src/cflex_build/internal/cflex_output.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_string.c PROPERTIES HEADER_FILE_ONLY ON)
 set_source_files_properties(src/cflex_build/internal/cflex_std.c PROPERTIES HEADER_FILE_ONLY ON)
 
 # Organize build tool files in the IDE to mirror the directory structure

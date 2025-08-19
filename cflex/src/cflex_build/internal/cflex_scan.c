@@ -31,7 +31,7 @@ ends_with( const char* str, const char* suffix )
     {
         return false;
     }
-    size_t s_len    = str_len( str );
+    size_t s_len   = str_len( str );
     size_t suf_len = str_len( suffix );
     if ( suf_len > s_len )
     {
@@ -64,7 +64,7 @@ find_header_files( const char* path, file_list_t* header_files )
             }
             else
             {
-                print_fprintf( stderr, "Warning: Exceeded max header file limit of %d\n", MAX_FILES );
+                file_print_fmt( stderr, "Warning: Exceeded max header file limit of %d\n", MAX_FILES );
                 break;
             }
         }

@@ -11,9 +11,9 @@ static const char* parse_enum( const char* cursor, parsed_data_t* data );
 static const char*
 read_identifier( const char* cursor, char* buffer, size_t buffer_size )
 {
-    cursor   = ltrim( cursor );
+    cursor   = str_left_trim( cursor );
     size_t i = 0;
-    while ( *cursor && is_identifier_char( *cursor ) && i < buffer_size - 1 ) { buffer[ i++ ] = *cursor++; }
+    while ( *cursor && char_is_identifier( *cursor ) && i < buffer_size - 1 ) { buffer[ i++ ] = *cursor++; }
     buffer[ i ] = '\0';
     return cursor;
 }
@@ -26,7 +26,7 @@ parse_header_file( const char* filepath, parsed_data_t* data )
     FILE* fp = fopen( filepath, "r" );
     if ( !fp )
     {
-        print_fprintf( stderr, "Error: Could not open file %s\n", filepath );
+        file_print_fmt( stderr, "Error: Could not open file %s\n", filepath );
         return false;
     }
 
@@ -70,7 +70,7 @@ parse_header_file( const char* filepath, parsed_data_t* data )
 
         if ( !cursor )
         {
-            print_fprintf( stderr, "Error parsing file %s. Aborting.\n", filepath );
+            file_print_fmt( stderr, "Error parsing file %s. Aborting.\n", filepath );
             return false;
         }
     }
@@ -83,16 +83,16 @@ parse_header_file( const char* filepath, parsed_data_t* data )
 static const char*
 parse_struct( const char* cursor, parsed_data_t* data )
 {
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     if ( str_ncmp( cursor, "typedef struct", 14 ) != 0 )
         return cursor;
     cursor += 14;
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     char tag_name[ MAX_NAME_LENGTH ];
     cursor = read_identifier( cursor, tag_name, sizeof( tag_name ) );
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     if ( *cursor != '{' )
         return cursor;
@@ -117,7 +117,7 @@ parse_struct( const char* cursor, parsed_data_t* data )
             break;
 
         cursor = field_marker + str_len( "CF_FIELD()" );
-        cursor = ltrim( cursor );
+        cursor = str_left_trim( cursor );
 
         if ( type->struct_info.num_fields >= MAX_FIELDS )
             return NULL;
@@ -134,17 +134,17 @@ parse_struct( const char* cursor, parsed_data_t* data )
     }
 
     cursor          = body_end + 1;    // Move past '}'
-    cursor          = ltrim( cursor );
+    cursor          = str_left_trim( cursor );
     cursor          = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
     char* semicolon = str_chr( type->name, ';' );
     if ( semicolon )
         *semicolon = '\0';
 
-    print_printf( "Parsed Struct '%s' with %d fields\n", type->name, type->struct_info.num_fields );
+    print_fmt( "Parsed Struct '%s' with %d fields\n", type->name, type->struct_info.num_fields );
     for ( int i = 0; i < type->struct_info.num_fields; i++ )
     {
-        print_printf( "  - Field: %s %s\n", type->struct_info.fields[ i ].type_name,
-                type->struct_info.fields[ i ].name );
+        print_fmt( "  - Field: %s %s\n", type->struct_info.fields[ i ].type_name,
+                   type->struct_info.fields[ i ].name );
     }
 
     data->num_types++;
@@ -154,16 +154,16 @@ parse_struct( const char* cursor, parsed_data_t* data )
 static const char*
 parse_enum( const char* cursor, parsed_data_t* data )
 {
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     if ( str_ncmp( cursor, "typedef enum", 12 ) != 0 )
         return cursor;
     cursor += 12;
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     char tag_name[ MAX_NAME_LENGTH ];
     cursor = read_identifier( cursor, tag_name, sizeof( tag_name ) );
-    cursor = ltrim( cursor );
+    cursor = str_left_trim( cursor );
 
     if ( *cursor != '{' )
         return cursor;
@@ -202,7 +202,7 @@ parse_enum( const char* cursor, parsed_data_t* data )
         if ( equals )
             *equals = '\0';
 
-        read_identifier( ltrim( temp ), value->name, MAX_NAME_LENGTH );
+        read_identifier( str_left_trim( temp ), value->name, MAX_NAME_LENGTH );
 
         if ( str_len( value->name ) > 0 )
         {
@@ -217,16 +217,16 @@ parse_enum( const char* cursor, parsed_data_t* data )
     }
 
     cursor          = body_end + 1;
-    cursor          = ltrim( cursor );
+    cursor          = str_left_trim( cursor );
     cursor          = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
     char* semicolon = str_chr( type->name, ';' );
     if ( semicolon )
         *semicolon = '\0';
 
-    print_printf( "Parsed Enum '%s' with %d values\n", type->name, type->enum_info.num_values );
+    print_fmt( "Parsed Enum '%s' with %d values\n", type->name, type->enum_info.num_values );
     for ( int i = 0; i < type->enum_info.num_values; i++ )
     {
-        print_printf( "  - Value: %s\n", type->enum_info.values[ i ].name );
+        print_fmt( "  - Value: %s\n", type->enum_info.values[ i ].name );
     }
 
     data->num_types++;
