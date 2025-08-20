@@ -86,11 +86,30 @@ typedef struct cf_type_t
     };
 } cf_type_t;
 
-// Include the public generated header which defines cf_type_id_t
-#include "cflex_generated.h"
-
 // --- Library API ---
+
+// Initializes the reflection system. Must be called before any other API functions.
+void cf_initialize(void);
+
+// Shuts down the reflection system and frees any allocated resources.
+void cf_shutdown(void);
+
+// Find a type by its name (e.g., "player_t").
 const cf_type_t* cf_find_type_by_name( const char* name );
-// const cf_type_t* cf_find_type_by_id( cf_type_id_t id );
+
+// Gets the number of registered type tables.
+int32_t cf_get_num_tables(void);
+
+// Gets a specific type table by its index.
+void cf_get_table( int32_t table_index, const cf_type_t*** out_types, int32_t* out_count );
+
+// For a given struct type, find a field by its name.
+const cf_field_t* cf_find_field( const cf_type_t* type, const char* name );
+
+// For a given enum type, find a value by its name.
+const cf_enum_value_t* cf_find_enum_value_by_name( const cf_type_t* type, const char* name );
+
+// For a given enum type, find a value by its integer value.
+const cf_enum_value_t* cf_find_enum_value_by_value( const cf_type_t* type, int32_t value );
 
 #endif    // CFLEX_H

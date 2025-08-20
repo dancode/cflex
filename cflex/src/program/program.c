@@ -4,6 +4,8 @@
 
 #include "cflex.h"
 #include "cflex_implementation.h"
+#include "cflex_default_generated.h"
+#include "program_generated.h"
 
 void
 print_type_details( const cf_type_t* type )
@@ -39,11 +41,36 @@ print_type_details( const cf_type_t* type )
     }
 }
 
+void
+print_all_types()
+{
+    printf( "--- All Registered Types ---\n" );
+    int32_t num_tables = cf_get_num_tables();
+    for ( int32_t i = 0; i < num_tables; ++i )
+    {
+        const cf_type_t** types;
+        int32_t           count;
+        cf_get_table( i, &types, &count );
+
+        printf( "--- Table %d (%d types) ---\n", i, count );
+        for ( int32_t j = 0; j < count; ++j )
+        {
+            print_type_details( types[ j ] );
+            printf( "\n" );
+        }
+    }
+    printf( "---------------------------------\n" );
+}
+
 int
 main( int argc, char** argv )
 {
     (void)argc;
     (void)argv;
+
+    cf_initialize();
+    cflex_default_register_types();
+    program_register_types();
 
     printf( "C-Flex Reflection System Demo\n" );
     printf( "-----------------------------\n" );
@@ -66,9 +93,10 @@ main( int argc, char** argv )
     print_type_details( non_existent_type );
     printf( "\n" );
 
-    printf( "Searching for type by ID: CF_TYPE_ID_PLAYER_T...\n" );
-    const cf_type_t* player_by_id = cf_find_type_by_id( CF_TYPE_ID_PLAYER_T );
-    print_type_details( player_by_id );
+    // --- New ---
+    // Print all types in the system
+    print_all_types();
 
+    cf_shutdown();
     return 0;
 }
