@@ -98,6 +98,24 @@ set(GENERATED_DIR ${CMAKE_BINARY_DIR}/cflex_generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 # --------------------------------------------------------------------
+# --- CFLEX LIbrary (Header-Only)
+# --------------------------------------------------------------------
+
+# Create an INTERFACE library for cflex. This is the modern CMake way to handle
+# header-only libraries, as it allows usage requirements (like include paths)
+# to be attached to the library and propagated to consumers.
+# add_library(cflex INTERFACE)
+
+# The cflex library needs its own source directory for its header, and crucially,
+# it also depends on the generated files. Adding the generated directory to the
+# INTERFACE ensures that any target linking against cflex gets this path,
+# which is the most robust way to solve IDE IntelliSense issues.
+# target_include_directories(cflex INTERFACE
+#     ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
+#     # ${GENERATED_DIR}
+# )
+
+# --------------------------------------------------------------------
 # --- Default Module (basic reflection types) ---
 # --------------------------------------------------------------------
 
@@ -117,6 +135,7 @@ add_custom_command(
 
 # Define a target called "generate_cflex_default" that depends on these files.
 add_custom_target(generate_cflex_default DEPENDS ${DEFAULT_GENERATED_C} ${DEFAULT_GENERATED_H})
+set_target_properties(generate_cflex_default PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
 
 # --------------------------------------------------------------------
 # --- Program Module (reflection types) ---
@@ -128,16 +147,22 @@ set(PROGRAM_GENERATED_C ${GENERATED_DIR}/${PROGRAM_MODULE_NAME}_generated.c)
 
 # Tell CMake how to create these files.
 # The "cflex_build" tool is run to generate them (with the command arugments specified)
+# It will output is older than depdency, it will generate again (build tool was updated)
+
 add_custom_command(
-    OUTPUT ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H}
+    OUTPUT ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} #we want these files!
     COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/program ${GENERATED_DIR} --name ${PROGRAM_MODULE_NAME}
-    DEPENDS cflex_build
+    DEPENDS cflex_build #build me first!
     COMMENT "Generating program reflection files"
     VERBATIM
 )
 
+# note: This command will force rebuild every compile
+# COMMAND ${CMAKE_COMMAND} -E rm -f ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H}
+
 # Define a target called "generate_program" that depends on these files.
 add_custom_target(generate_program DEPENDS ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H})
+set_target_properties(generate_program PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
 
 # --------------------------------------------------------------------
 # --- Unit Test Module (reflection types) ---
@@ -157,6 +182,7 @@ add_custom_command(
 
 # Define a target called "generate_cflx_unit" that depends on these files.
 add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
+set_target_properties(generate_cflex_unit PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
 
 # --------------------------------------------------------------------
 # Program (example application)
@@ -177,12 +203,26 @@ target_include_directories(program PRIVATE
     ${GENERATED_DIR}
 )
 
+# **NEW** Add the generated headers/sources to the program target explicitly 
+# (important for IntelliSense & IDEs)
+target_sources(program PRIVATE ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H})
+
+# Link the program against the cflex library. This transitively applies the
+# include directories from cflex to the program, which is a more robust way
+# of managing dependencies for IDEs and build systems.
+# target_link_libraries(program PRIVATE cflex)
+
 # Make sure the reflection files are generated before building "program".
 add_dependencies(program generate_cflex_default generate_program)
 
 # Group "program" files under a "program" folder in IDEs.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" 
     FILES src/program/program.c src/program/program.h src/program/program_cflex.c)
+
+# Group "program" files under a "program" folder in IDEs.
+source_group(TREE ${GENERATED_DIR} PREFIX "generated" 
+    FILES ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} )
+
 
 # --------------------------------------------------------------------
 # CFLX_UNIT (unit testing application)
@@ -202,11 +242,42 @@ target_include_directories(cflex_unit PRIVATE
     ${GENERATED_DIR}
 )
 
+# **NEW** Add the generated headers/sources to the program target explicitly 
+# (important for IntelliSense & IDEs)
+target_sources(cflex_unit PRIVATE ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
+
+# Link the program against the cflex library. This transitively applies the
+# include directories from cflex to the program, which is a more robust way
+# of managing dependencies for IDEs and build systems.
+target_link_libraries(cflex_unit PRIVATE cflex)
+
 # Again, ensure reflection files exist before compiling.
 add_dependencies(cflex_unit generate_cflex_default generate_cflex_unit)
 
 # Group "cflex_unit" files under a "cflex_unit" folder.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "source" 
     FILES src/cflex_unit/cflex_unit.c src/cflex_unit/cflex_unit_types.h src/cflex_unit/cflex_unit_cflex.c)
+
+# Group "program" files under a "program" folder in IDEs.
+source_group(TREE ${GENERATED_DIR} PREFIX "generated" 
+    FILES ${UNIT_GENERATED_C} ${UNIT_GENERATED_H} )
 	
 # --------------------------------------------------------------------
+
+set_target_properties(program PROPERTIES FOLDER "Apps")
+set_target_properties(cflex_unit PROPERTIES FOLDER "Tests")
+set_target_properties(cflex_build PROPERTIES FOLDER "Tools")
+
+# --- Hide CMake's predefined/utility targets in Visual Studio ---
+# set(CMAKE_SUPERFLOUS_TARGETS ALL_BUILD INSTALL PACKAGE RUN_TESTS ZERO_CHECK )
+# foreach(tgt IN LISTS CMAKE_SUPERFLOUS_TARGETS)
+#     if(TARGET ${tgt})
+#         set_target_properties(${tgt} PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+#     endif()
+# endforeach()
+
+# set_target_properties(ALL_BUILD PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+# set_target_properties(INSTALL   PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+# set_target_properties(PACKAGE   PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+# set_target_properties(RUN_TESTS PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+# set_target_properties(ZERO_CHECK PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
