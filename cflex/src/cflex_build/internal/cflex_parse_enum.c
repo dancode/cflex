@@ -118,6 +118,8 @@ parse_enum( const char* cursor, parsed_data_t* data )
 
         if ( *cursor == ',' )
             cursor++;
+        else if (next_comma) // Handle trailing comma
+             cursor = next_comma + 1;
         else
             cursor = value_end;
     }

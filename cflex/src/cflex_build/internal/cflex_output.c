@@ -200,6 +200,7 @@ generate_c_file( FILE*           fp,
         file_print_fmt( fp, "static const cf_type_t** %s_type_array = NULL;\n", module_name );
         file_print_fmt( fp, "static const int32_t %s_type_count = 0;\n\n", module_name );
     }
+
     file_print_fmt( fp, "void %s_register_types(void) {\n", module_name );
     file_print_fmt( fp, "    cf_register_type_table(%s_type_array, %s_type_count);\n", module_name, module_name );
     file_print_fmt( fp, "}\n" );

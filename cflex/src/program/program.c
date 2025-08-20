@@ -1,7 +1,5 @@
 #include "program.h"
-
 #include <stdio.h>
-
 #include "cflex.h"
 #include "cflex_default_generated.h"
 #include "program_generated.h"
@@ -92,8 +90,6 @@ main( int argc, char** argv )
     print_type_details( non_existent_type );
     printf( "\n" );
 
-    // --- New ---
-    // Print all types in the system
     print_all_types();
 
     cf_shutdown();
