@@ -21,6 +21,22 @@ read_identifier( const char* cursor, char* buffer, int32_t buffer_size )
 
 /*============================================================================================*/
 
+// Parse the next (optional) token keyword and check if it is was we expect.
+
+static const char*
+optional_keyword( const char* cursor, const char* keyword )
+{
+    cursor      = str_left_trim( cursor );
+    int32_t len = str_len( keyword );
+    if ( str_ncmp( cursor, keyword, len ) != 0 )
+    {
+        return NULL;
+    }
+    return cursor + len;
+}
+
+/*============================================================================================*/
+
 // Parse the next token keyword and check if it is was we expect
 
 static const char*

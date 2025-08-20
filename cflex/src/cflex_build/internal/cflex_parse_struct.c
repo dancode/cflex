@@ -35,10 +35,15 @@ parse_field( const char* cursor, parsed_type_t* type )
 static const char*
 parse_struct( const char* cursor, parsed_data_t* data )
 {
-    cursor = str_left_trim( cursor );
-    cursor = expect_keyword( cursor, "typedef" );
-    if ( !cursor )
-        return NULL;
+    bool is_typedef           = false;
+
+    cursor                    = str_left_trim( cursor );
+    const char* after_typedef = optional_keyword( cursor, "typedef" );
+    if ( after_typedef )
+    {
+        is_typedef = true;
+        cursor     = str_left_trim( after_typedef );
+    }
 
     cursor = str_left_trim( cursor );
     cursor = expect_keyword( cursor, "struct" );
@@ -60,13 +65,13 @@ parse_struct( const char* cursor, parsed_data_t* data )
     const char* body_end   = str_chr( body_start, '}' );
     if ( !body_end )
     {
-        print_fmt( "Error: struct missing closing brace\n" );
+        print_fmt( "Parse error:: struct missing closing brace\n" );
         return NULL;
     }
 
     if ( data->num_types >= MAX_USER_TYPES )
     {
-        print_fmt( "Error: too many user types\n" );
+        print_fmt( "Parse error:: too many user types\n" );
         return NULL;
     }
 
@@ -94,23 +99,49 @@ parse_struct( const char* cursor, parsed_data_t* data )
             return NULL;
     }
 
-    // Move past '}'
     cursor = expect_char( body_end, '}' );
     if ( !cursor )
         return NULL;
 
-    // Read typedef enum name.
-    cursor = str_left_trim( cursor );
-    cursor = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
-
-    // Strip (optional) trailing ';' from string name.
+    if ( is_typedef )
     {
-        char* semi = str_chr( type->name, ';' );
-        if ( semi )
-            *semi = '\0';
+        // typedef struct { … } name;
+        cursor = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
+        if ( str_len( type->name ) == 0 )
+        {
+            print_fmt( "Parse error: typedef struct missing closing identifier\n" );
+            return NULL;
+        }
+
+        cursor = str_left_trim( cursor );
+        cursor = expect_char( cursor, ';' );
+        if ( !cursor )
+        {
+            print_fmt( "Parse error: typedef struct missing semicolon\n" );
+            return NULL;
+        }
+    }
+    else
+    {
+        // enum name { … };
+        if ( str_len( tag_name ) == 0 )
+        {
+            print_fmt( "Parse error: non-typedef struct must have a tag name\n" );
+            return NULL;
+        }
+
+        str_copy( type->name, tag_name, MAX_NAME_LENGTH );
+
+        cursor = str_left_trim( cursor );
+        cursor = expect_char( cursor, ';' );
+        if ( !cursor )
+        {
+            print_fmt( "Parse error: struct expected semicolon\n" );
+            return NULL;
+        }
     }
 
-    if ( CFLEX_BUILD_DEBUG )
+    if ( CFLEX_DEBUG_PRINT )
     {
         print_fmt( "Parsed Struct '%s' with %d fields\n", type->name, type->struct_info.num_fields );
         for ( int i = 0; i < type->struct_info.num_fields; i++ )

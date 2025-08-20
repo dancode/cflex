@@ -81,7 +81,7 @@ parse_header_file( const char* filepath, parsed_data_t* data )
             cursor          = parser( suffix + advance, data );
             if ( !cursor )
             {
-                file_print_fmt( stderr, "Error parsing file %s. Aborting.\n", filepath );
+                file_print_fmt( stderr, "Error: parsing file %s\n", filepath );
                 return false;
             }
         }

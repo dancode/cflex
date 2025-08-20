@@ -114,7 +114,7 @@ main( int argc, char** argv )
         {
             if ( parse_header_file( header_files.files[ i ], &parsed_data ) == false )
             {
-                file_print_fmt( stderr, "Error parsing file, aborting.\n" );
+                file_print_fmt( stderr, "\n!!! Build Generation Failure !!!\n\n" );
                 return 1;
             }
         }
@@ -127,5 +127,5 @@ main( int argc, char** argv )
         return 1;
     }
 
-    return 0;
+    return 0; /* success */
 }
