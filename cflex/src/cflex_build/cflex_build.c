@@ -74,11 +74,22 @@ main( int argc, char** argv )
         }
     }
 
-    if ( !input_path || !output_path )
+    if ( 1 )
     {
-        file_print_fmt( stderr, "Usage: %s <input_path> <output_path> [--name <module_name>] [--default-types-only]\n",
-                        argv[ 0 ] );
-        return 1;
+        input_path  = "F:/C/cflex/cflex/src/program";
+        output_path = "F:/C/cflex/cflex/build/cflex_generated";
+        module_name = "program";
+    }
+    else
+    {
+        if ( !input_path || !output_path )
+        {
+            file_print_fmt(
+                stderr,
+                "Usage: %s <input_path> <output_path> [--name <module_name>] [--default-types-only]\n",
+                argv[ 0 ] );
+            return 1;
+        }
     }
 
     print_fmt( "CFlex Build Reflection Generator\n" );

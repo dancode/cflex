@@ -193,7 +193,6 @@ add_executable(program
     src/program/program.c
     src/program/program.h
     src/program/program_cflex.c
-    ${LIB_HEADER_FILES}
 )
 
 # Tell it where to find headers: its own folder, the cflex library, and the generated files.
@@ -206,6 +205,7 @@ target_include_directories(program PRIVATE
 # **NEW** Add the generated headers/sources to the program target explicitly 
 # (important for IntelliSense & IDEs)
 target_sources(program PRIVATE ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H})
+set_source_files_properties( ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} PROPERTIES HEADER_FILE_ONLY ON )
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way
@@ -222,7 +222,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source"
 # Group "program" files under a "program" folder in IDEs.
 source_group(TREE ${GENERATED_DIR} PREFIX "generated" 
     FILES ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} )
-
 
 # --------------------------------------------------------------------
 # CFLX_UNIT (unit testing application)
@@ -245,11 +244,12 @@ target_include_directories(cflex_unit PRIVATE
 # **NEW** Add the generated headers/sources to the program target explicitly 
 # (important for IntelliSense & IDEs)
 target_sources(cflex_unit PRIVATE ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
+set_source_files_properties( ${UNIT_GENERATED_C} ${UNIT_GENERATED_H} PROPERTIES HEADER_FILE_ONLY ON )
 
 # Link the program against the cflex library. This transitively applies the
 # include directories from cflex to the program, which is a more robust way
 # of managing dependencies for IDEs and build systems.
-target_link_libraries(cflex_unit PRIVATE cflex)
+# target_link_libraries(cflex_unit PRIVATE cflex)
 
 # Again, ensure reflection files exist before compiling.
 add_dependencies(cflex_unit generate_cflex_default generate_cflex_unit)
@@ -267,17 +267,3 @@ source_group(TREE ${GENERATED_DIR} PREFIX "generated"
 set_target_properties(program PROPERTIES FOLDER "Apps")
 set_target_properties(cflex_unit PROPERTIES FOLDER "Tests")
 set_target_properties(cflex_build PROPERTIES FOLDER "Tools")
-
-# --- Hide CMake's predefined/utility targets in Visual Studio ---
-# set(CMAKE_SUPERFLOUS_TARGETS ALL_BUILD INSTALL PACKAGE RUN_TESTS ZERO_CHECK )
-# foreach(tgt IN LISTS CMAKE_SUPERFLOUS_TARGETS)
-#     if(TARGET ${tgt})
-#         set_target_properties(${tgt} PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-#     endif()
-# endforeach()
-
-# set_target_properties(ALL_BUILD PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-# set_target_properties(INSTALL   PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-# set_target_properties(PACKAGE   PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-# set_target_properties(RUN_TESTS PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-# set_target_properties(ZERO_CHECK PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")

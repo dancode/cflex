@@ -21,8 +21,7 @@ read_identifier( const char* cursor, char* buffer, int32_t buffer_size )
 
 /*============================================================================================*/
 
-// Parses a `typedef struct` block after a `CF_STRUCT()` annotation.
-// Extracts the struct's name and any fields marked with `CF_FIELD()`.
+// Parse the next token keyword and check if it is was we expect
 
 static const char*
 expect_keyword( const char* cursor, const char* keyword )

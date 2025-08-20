@@ -17,7 +17,7 @@ typedef struct cf_type_table_t
 
 typedef struct cf_registry_t
 {
-    cf_type_table_t tables[MAX_TYPE_TABLES];
+    cf_type_table_t tables[ MAX_TYPE_TABLES ];
     int32_t         num_tables;
 } cf_registry_t;
 
@@ -31,7 +31,10 @@ cf_initialize( void )
     if ( !g_registry )
     {
         g_registry = (cf_registry_t*)malloc( sizeof( cf_registry_t ) );
-        memset( g_registry, 0, sizeof( cf_registry_t ) );
+        if ( g_registry != NULL )
+        {
+            memset( g_registry, 0, sizeof( cf_registry_t ) );
+        }
     }
 }
 
@@ -158,4 +161,4 @@ cf_find_enum_value_by_value( const cf_type_t* type, int32_t value )
     return NULL;
 }
 
-#endif // CFLEX_IMPLEMENTATION_H
+#endif    // CFLEX_IMPLEMENTATION_H

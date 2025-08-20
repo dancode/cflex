@@ -19,10 +19,11 @@ parse_enum_value( const char* cursor, parsed_type_t* type, int32_t* last_value )
         return cursor;
     }
 
-    const char*      name_start = cursor;
-    const char*      name_end   = cursor;
-    const char*      equals     = NULL;
-    parsed_enum_value_t* value      = &type->enum_info.values[ type->enum_info.num_values ];
+    const char* name_start     = cursor;
+    const char* name_end       = cursor;
+    const char* equals         = NULL;
+
+    parsed_enum_value_t* value = &type->enum_info.values[ type->enum_info.num_values ];
 
     // Find the end of the identifier and the optional equals sign
     while ( *cursor && *cursor != ',' && *cursor != '}' )
@@ -36,16 +37,13 @@ parse_enum_value( const char* cursor, parsed_type_t* type, int32_t* last_value )
     name_end = equals ? equals : cursor;
 
     // Trim trailing whitespace from the name
-    while ( name_end > name_start && char_is_space( *( name_end - 1 ) ) )
-    {
-        name_end--;
-    }
+    while ( name_end > name_start && char_is_space( *( name_end - 1 ) ) ) { name_end--; }
 
     str_copy_sub( value->name, name_start, (int32_t)( name_end - name_start ), MAX_NAME_LENGTH );
 
     if ( str_len( value->name ) == 0 )
     {
-        return cursor; // Skip empty entries from multiple commas
+        return cursor;    // Skip empty entries from multiple commas
     }
 
     if ( equals )
@@ -66,33 +64,47 @@ parse_enum_value( const char* cursor, parsed_type_t* type, int32_t* last_value )
 
 /*============================================================================================*/
 
+
 static const char*
 parse_enum( const char* cursor, parsed_data_t* data )
 {
     cursor = str_left_trim( cursor );
-    cursor = expect_keyword( cursor, "typedef" );
-    if ( !cursor )
-        return NULL;
+
+    // "typedef" is optional
+
+    bool        is_typedef    = false;
+    const char* after_typedef = expect_keyword( cursor, "typedef" );
+    if ( after_typedef )
+    {
+        is_typedef = true;
+        cursor     = str_left_trim( after_typedef );
+    }
 
     cursor = str_left_trim( cursor );
     cursor = expect_keyword( cursor, "enum" );
     if ( !cursor )
+    {
+        print_fmt( "Error: expected enum keyword\n" );
         return NULL;
+    }
 
     char tag_name[ MAX_NAME_LENGTH ];
     cursor = str_left_trim( cursor );
     cursor = read_identifier( cursor, tag_name, sizeof( tag_name ) );
-    cursor = str_left_trim( cursor );
 
+    cursor = str_left_trim( cursor );
     cursor = expect_char( cursor, '{' );
     if ( !cursor )
+    {
+        print_fmt( "Error: exepcted enum body\n" );
         return NULL;
+    }
 
     const char* body_start = cursor;
     const char* body_end   = str_chr( body_start, '}' );
     if ( !body_end )
     {
-        print_fmt( "Error: enum missing closing brace\n" );
+        print_fmt( "Error: expected enum closing brace\n" );
         return NULL;
     }
 
@@ -107,33 +119,65 @@ parse_enum( const char* cursor, parsed_data_t* data )
     type->enum_info.num_values = 0;
     int32_t last_value         = 0;
 
+    // Parse values inside body
     while ( cursor < body_end )
     {
-        const char* next_comma = str_chr( cursor, ',' );
-        const char* value_end  = ( next_comma && next_comma < body_end ) ? next_comma : body_end;
-
         cursor = parse_enum_value( cursor, type, &last_value );
         if ( !cursor )
             return NULL;
 
+        cursor = str_left_trim( cursor );
         if ( *cursor == ',' )
+        {
             cursor++;
-        else if (next_comma) // Handle trailing comma
-             cursor = next_comma + 1;
-        else
-            cursor = value_end;
+            cursor = str_left_trim( cursor );
+        }
     }
 
     cursor = expect_char( body_end, '}' );
     if ( !cursor )
+    {
+        print_fmt( "Error: closing brace expected after enum (wihtout comma)\n" );
         return NULL;
+    }
 
-    cursor = str_left_trim( cursor );
-    cursor = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
+    if ( is_typedef )
+    {
+        // typedef enum { … } Name;
+        cursor = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
+        if ( str_len( type->name ) == 0 )
+        {
+            print_fmt( "Error: typedef enum missing closing identifier\n" );
+            return NULL;
+        }
 
-    char* semi = strchr( type->name, ';' );
-    if ( semi )
-        *semi = '\0';
+        cursor = str_left_trim( cursor );
+        cursor = expect_char( cursor, ';' );
+        if ( !cursor )
+        {
+            print_fmt( "Error: typedef enum missing semicolon\n" );
+            return NULL;
+        }
+    }
+    else
+    {
+        // enum Name { … };
+        if ( str_len( tag_name ) == 0 )
+        {
+            print_fmt( "Error: non-typedef enum must have a tag name\n" );
+            return NULL;
+        }
+
+        str_copy( type->name, tag_name, MAX_NAME_LENGTH );
+
+        cursor = str_left_trim( cursor );
+        cursor = expect_char( cursor, ';' );
+        if ( !cursor )
+        {
+            print_fmt( "Error: enum missing semicolon\n" );
+            return NULL;
+        }
+    }
 
     data->num_types++;
     return cursor;
