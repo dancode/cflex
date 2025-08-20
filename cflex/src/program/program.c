@@ -66,7 +66,6 @@ main( int argc, char** argv )
     (void)argv;
 
     cf_initialize();
-    cflex_default_register_types();
     program_register_types();
 
     printf( "C-Flex Reflection System Demo\n" );
