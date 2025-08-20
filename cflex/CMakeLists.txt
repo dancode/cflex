@@ -34,6 +34,7 @@ set_source_files_properties(
     src/cflex_build/internal/cflex_std.c
     PROPERTIES HEADER_FILE_ONLY ON
 )
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "source" FILES ${TOOL_SOURCE_FILES})
 
 # --- Generated Files ---
@@ -80,7 +81,69 @@ add_custom_command(
 add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
 
 
+# Command to generate 'cflex_unit' module types
+set(UNIT_MODULE_NAME "cflex_unit")
+set(UNIT_GENERATED_H ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.h)
+set(UNIT_GENERATED_C ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.c)
+add_custom_command(
+    OUTPUT ${UNIT_GENERATED_C} ${UNIT_GENERATED_H}
+    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit ${GENERATED_DIR} --name ${UNIT_MODULE_NAME}
+    DEPENDS cflex_build
+    COMMENT "Generating cflex_unit reflection files"
+    VERBATIM
+)
+add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
+
+function(cflex_add_default_module)
+    set(MODULE_NAME "cflex_default")
+    set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${MODULE_NAME}_generated.c)
+
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR} ${GENERATED_DIR} --name ${MODULE_NAME} --default-types-only
+        DEPENDS cflex_build
+        COMMENT "Generating default reflection files for ${MODULE_NAME}"
+        VERBATIM
+    )
+
+    add_library(${MODULE_NAME}_lib STATIC ${GENERATED_C} ${GENERATED_H})
+    target_include_directories(${MODULE_NAME}_lib PUBLIC ${GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME})
+    add_custom_target(generate_reflection_${MODULE_NAME} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    add_dependencies(${MODULE_NAME}_lib generate_reflection_${MODULE_NAME})
+
+    add_library(${MODULE_NAME} INTERFACE)
+    target_link_libraries(${MODULE_NAME} INTERFACE ${MODULE_NAME}_lib)
+endfunction()
+
+function(cflex_add_module MODULE_NAME)
+    set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${MODULE_NAME}_generated.c)
+
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME} ${GENERATED_DIR} --name ${MODULE_NAME}
+        DEPENDS cflex_build
+        COMMENT "Generating reflection files for ${MODULE_NAME}"
+        VERBATIM
+    )
+
+    add_library(${MODULE_NAME}_lib STATIC ${GENERATED_C} ${GENERATED_H})
+    target_include_directories(${MODULE_NAME}_lib PUBLIC ${GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME})
+    add_custom_target(generate_reflection_${MODULE_NAME} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    add_dependencies(${MODULE_NAME}_lib generate_reflection_${MODULE_NAME})
+
+    add_library(${MODULE_NAME}_module INTERFACE)
+    target_link_libraries(${MODULE_NAME}_module INTERFACE ${MODULE_NAME}_lib)
+endfunction()
+
+# --- Module Definitions ---
+cflex_add_default_module()
+cflex_add_module(program)
+cflex_add_module(cflex_unit)
+
 # --- Example Application ---
+
 add_executable(program
     src/program/program.c
     src/program/program.h
@@ -111,3 +174,4 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "cflex_unit" FILES src/cflex_unit/cflex_unit.c src/cflex_unit/cflex_unit_types.h src/cflex_unit/cflex_unit_cflex.c)
 file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
+

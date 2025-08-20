@@ -136,6 +136,7 @@ main( int argc, char** argv )
     print_fmt( "Input Path: %s\n", input_path );
     print_fmt( "Output Path: %s\n", output_path );
     print_fmt( "Module Name: %s\n", module_name );
+
     if ( default_types_only )
     {
         print_fmt( "Mode: Default Types Only\n" );
