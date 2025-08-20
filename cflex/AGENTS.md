@@ -8,6 +8,7 @@ This file provides instructions for AI agents working on this codebase.
 - **Function Names:** All function names must be `lowercase_with_underscores`.
 - **Type Names:** All `struct` type definitions must use a `_t` suffix. For example: `my_struct_t`.
 - **Build System:** This project uses CMake. All build-related changes must be made in the `CMakeLists.txt` files.
+- **Comments** Leave concise, clear commments and do not delete local comments unless functionality under comments did not change.
 
 ## Coding Style 
 
