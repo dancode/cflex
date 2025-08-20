@@ -58,6 +58,7 @@ print_all_types()
             print_type_details( types[ j ] );
             printf( "\n" );
         }
+
     }
     printf( "---------------------------------\n" );
 }

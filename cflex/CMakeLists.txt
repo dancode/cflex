@@ -115,5 +115,7 @@ target_link_libraries(cflex_unit PRIVATE cflex cflex_default program_module cfle
 # --- IDE File Organization ---
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "cflex_unit" FILES src/cflex_unit/cflex_unit.c)
+
 file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
+

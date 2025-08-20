@@ -2,6 +2,7 @@
 #include <string.h>
 #include "cflex.h"
 #include "cflex_implementation.h"
+
 #include "cflex_default_generated.h"
 #include "program_generated.h"
 #include "cflex_unit_generated.h"
@@ -50,7 +51,7 @@ int test_table_api() {
     TEST_ASSERT(count > 0);
     TEST_ASSERT(types != NULL);
 
-    return 0;
+return 0;
 }
 
 int test_find_field() {
@@ -92,6 +93,7 @@ int test_find_enum_value() {
 
 
 int main() {
+
     cf_initialize();
     cflex_default_register_types();
     program_register_types();
@@ -106,5 +108,6 @@ int main() {
     printf("All tests passed!\n");
 
     cf_shutdown();
+
     return 0;
 }
