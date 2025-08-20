@@ -3,6 +3,10 @@
 #include "cflex.h"
 #include "cflex_implementation.h"
 
+#include "cflex_default_generated.h"
+#include "program_generated.h"
+#include "cflex_unit_generated.h"
+
 // --- Minimal Test Framework ---
 #define TEST_ASSERT(condition) \
     do { \
@@ -37,24 +41,17 @@ int test_find_type_by_name() {
     return 0;
 }
 
-int test_find_type_by_id() {
-    const cf_type_t* player_type = cf_find_type_by_id(CF_TYPE_ID_PLAYER_T);
-    TEST_ASSERT(player_type != NULL);
-    TEST_ASSERT(strcmp(player_type->name, "player_t") == 0);
+int test_table_api() {
+    int32_t num_tables = cf_get_num_tables();
+    TEST_ASSERT(num_tables > 0);
 
-    const cf_type_t* invalid_id = cf_find_type_by_id(CF_TYPE_ID_COUNT);
-    TEST_ASSERT(invalid_id == NULL);
-    return 0;
-}
-
-int test_get_all_types() {
     const cf_type_t** types;
-    int32_t count;
-    cf_get_all_types(&types, &count);
+    int32_t           count;
+    cf_get_table( 0, &types, &count );
     TEST_ASSERT(count > 0);
     TEST_ASSERT(types != NULL);
-    TEST_ASSERT(types[CF_TYPE_ID_PLAYER_T]->kind == CF_KIND_STRUCT);
-    return 0;
+
+return 0;
 }
 
 int test_find_field() {
@@ -96,13 +93,21 @@ int test_find_enum_value() {
 
 
 int main() {
+
+    cf_initialize();
+    cflex_default_register_types();
+    program_register_types();
+    cflex_unit_register_types();
+
     printf("--- Running C-Flex Unit Tests ---\n");
     RUN_TEST(test_find_type_by_name);
-    RUN_TEST(test_find_type_by_id);
-    RUN_TEST(test_get_all_types);
+    RUN_TEST(test_table_api);
     RUN_TEST(test_find_field);
     RUN_TEST(test_find_enum_value);
     printf("---------------------------------\n");
     printf("All tests passed!\n");
+
+    cf_shutdown();
+
     return 0;
 }

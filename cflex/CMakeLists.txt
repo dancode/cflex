@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project(cflex C)
 
 # Configure custom output directories for binaries
-# This places executables in /bin and libraries in /lib, outside the build folder
-
-# Set default output directories for single-config builds (e.g., Makefiles)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
@@ -25,139 +22,100 @@ set(CMAKE_C_EXTENSIONS OFF)
 # Enable solution folders for better organization in Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Add platform-agnostic warnings, and handle MSVC separately
+# Add platform-agnostic warnings
 if(MSVC)
-    # /W4 is a high warning level, /WX treats warnings as errors.
-    add_compile_options(/W4 /WX)    
+    add_compile_options(/W4 /WX)
 else()
-    # -Wall -Wextra are common warning flags, -pedantic enforces standard compliance,
-    # and -Werror treats warnings as errors.
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
 # --- cflex build tool ---
-# This executable is built first. It will be used to generate reflection code.
 file(GLOB_RECURSE TOOL_SOURCE_FILES "src/cflex_build/*.c" "src/cflex_build/*.h")
 add_executable(cflex_build ${TOOL_SOURCE_FILES})
 target_include_directories(cflex_build PUBLIC src/cflex_build)
-
-# Since internal .c files are included directly by cflex_build.c (unity build),
-# we must tell CMake not to compile them as a separate translation unit.
-# Setting HEADER_FILE_ONLY ensures they are still visible in IDEs like Visual Studio.
-set_source_files_properties(src/cflex_build/internal/cflex_platform.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_scan.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_parse.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_parse_util.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_parse_struct.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_parse_enum.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_output.c PROPERTIES HEADER_FILE_ONLY ON)
-set_source_files_properties(src/cflex_build/internal/cflex_std.c PROPERTIES HEADER_FILE_ONLY ON)
-
-# Organize build tool files in the IDE to mirror the directory structure
+set_source_files_properties(
+    src/cflex_build/internal/cflex_platform.c
+    src/cflex_build/internal/cflex_scan.c
+    src/cflex_build/internal/cflex_parse.c
+    src/cflex_build/internal/cflex_parse_util.c
+    src/cflex_build/internal/cflex_parse_struct.c
+    src/cflex_build/internal/cflex_parse_enum.c
+    src/cflex_build/internal/cflex_output.c
+    src/cflex_build/internal/cflex_std.c
+    PROPERTIES HEADER_FILE_ONLY ON
+)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_build PREFIX "source" FILES ${TOOL_SOURCE_FILES})
 
+# --- cflex library (header-only) ---
+add_library(cflex INTERFACE)
+target_include_directories(cflex INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex)
 
-# --- Generated files ---
-# Define the output directory for generated files within the build tree
+# --- cflex helper functions ---
 set(GENERATED_DIR ${CMAKE_BINARY_DIR}/cflex_generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-# Define the full paths for the generated header and source file
-set(GENERATED_H ${GENERATED_DIR}/cflex_generated.h)
-set(GENERATED_C ${GENERATED_DIR}/cflex_generated.c)
+function(cflex_add_default_module)
+    set(MODULE_NAME "cflex_default")
+    set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${MODULE_NAME}_generated.c)
 
-# Add a custom command to run the cflex_build tool.
-# This command executes the cflex_build target, passing it the source directory
-# of the example program and the directory for the generated output.
-# Using a generator expression ensures the correct path to the executable is used.
-add_custom_command(
-    OUTPUT ${GENERATED_C} ${GENERATED_H}
-    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_SOURCE_DIR}/src/program ${GENERATED_DIR}
-    DEPENDS cflex_build
-    COMMENT "Generating reflection files with cflex_build"
-    VERBATIM
-)
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR} ${GENERATED_DIR} --name ${MODULE_NAME} --default-types-only
+        DEPENDS cflex_build
+        COMMENT "Generating default reflection files for ${MODULE_NAME}"
+        VERBATIM
+    )
 
-# Add a custom target to make the generation step an explicit part of the build process.
-# This target depends on the generated files, ensuring they are created.
-add_custom_target(generate_reflection DEPENDS ${GENERATED_C} ${GENERATED_H})
+    add_library(${MODULE_NAME}_lib STATIC ${GENERATED_C} ${GENERATED_H})
+    target_include_directories(${MODULE_NAME}_lib PUBLIC ${GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME})
+    add_custom_target(generate_reflection_${MODULE_NAME} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    add_dependencies(${MODULE_NAME}_lib generate_reflection_${MODULE_NAME})
 
+    add_library(${MODULE_NAME} INTERFACE)
+    target_link_libraries(${MODULE_NAME} INTERFACE ${MODULE_NAME}_lib)
+endfunction()
 
-# --- cflex library (header-only) ---
-# Create an INTERFACE library for cflex. This is the modern CMake way to handle
-# header-only libraries, as it allows usage requirements (like include paths)
-# to be attached to the library and propagated to consumers.
-add_library(cflex INTERFACE)
+function(cflex_add_module MODULE_NAME)
+    set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${MODULE_NAME}_generated.c)
 
-# The cflex library needs its own source directory for its header, and crucially,
-# it also depends on the generated files. Adding the generated directory to the
-# INTERFACE ensures that any target linking against cflex gets this path,
-# which is the most robust way to solve IDE IntelliSense issues.
-target_include_directories(cflex INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex
-    ${GENERATED_DIR}
-)
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME} ${GENERATED_DIR} --name ${MODULE_NAME}
+        DEPENDS cflex_build
+        COMMENT "Generating reflection files for ${MODULE_NAME}"
+        VERBATIM
+    )
 
+    add_library(${MODULE_NAME}_lib STATIC ${GENERATED_C} ${GENERATED_H})
+    target_include_directories(${MODULE_NAME}_lib PUBLIC ${GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME})
+    add_custom_target(generate_reflection_${MODULE_NAME} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    add_dependencies(${MODULE_NAME}_lib generate_reflection_${MODULE_NAME})
+
+    add_library(${MODULE_NAME}_module INTERFACE)
+    target_link_libraries(${MODULE_NAME}_module INTERFACE ${MODULE_NAME}_lib)
+endfunction()
+
+# --- Module Definitions ---
+cflex_add_default_module()
+cflex_add_module(program)
+cflex_add_module(cflex_unit)
 
 # --- Example Application ---
-# This is the final executable that demonstrates the library.
 file(GLOB_RECURSE PROGRAM_SOURCE_FILES "src/program/*.c" "src/program/*.h")
-
-# Automatically find all library headers. This is used to add them to the executable
-# target so they appear in the IDE, and to the source_group for organization.
-# Using GLOB_RECURSE ensures that the full directory structure is discovered.
-file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
-
-# Also define a variable for the generated files, so they can be added to the target.
-set(GENERATED_FILES ${GENERATED_H} ${GENERATED_C})
-
-add_executable(program
-    ${PROGRAM_SOURCE_FILES}
-    ${LIB_HEADER_FILES}
-    ${GENERATED_FILES}
-)
-
-target_include_directories(program PRIVATE
-    src/program
-    ${GENERATED_DIR}
-)
-
-target_link_libraries(program PRIVATE cflex)
-add_dependencies(program generate_reflection)
+add_executable(program ${PROGRAM_SOURCE_FILES})
+target_link_libraries(program PRIVATE cflex cflex_default program_module)
 
 # --- Unit Test Application ---
-add_executable(cflex_unit
-    src/cflex_unit/cflex_unit.c
-    ${LIB_HEADER_FILES}
-    ${GENERATED_FILES}
-)
-
-target_include_directories(cflex_unit PRIVATE
-    src/program # For program.h
-    src/cflex_unit
-    ${GENERATED_DIR}
-)
-
-target_link_libraries(cflex_unit PRIVATE cflex)
-add_dependencies(cflex_unit generate_reflection)
-
-
-# Since cflex_generated.c is included directly by cflex_implementation.h,
-# we must tell CMake not to compile it as a separate translation unit,
-# which would cause a "multiple definition" linker error.
-# Setting HEADER_FILE_ONLY ensures it's still visible in IDEs like Visual Studio.
-set_source_files_properties(${GENERATED_C} PROPERTIES HEADER_FILE_ONLY ON)
+add_executable(cflex_unit src/cflex_unit/cflex_unit.c)
+target_include_directories(cflex_unit PRIVATE src/program)
+target_link_libraries(cflex_unit PRIVATE cflex cflex_default program_module cflex_unit_module)
 
 # --- IDE File Organization ---
-# Organize application and library files in the IDE to mirror the directory structure.
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "program" FILES ${PROGRAM_SOURCE_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "cflex_unit" FILES src/cflex_unit/cflex_unit.c)
+
+file(GLOB_RECURSE LIB_HEADER_FILES "src/cflex/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex PREFIX "cflex" FILES ${LIB_HEADER_FILES})
-source_group(TREE ${GENERATED_DIR} PREFIX "cflex_generated" FILES ${GENERATED_FILES})
 
-
-# --- Optional: Installation ---
-# This section provides rules for installing the final application and the library header.
-# It is commented out but serves as a good practice example.
-# install(TARGETS program cflex_unit DESTINATION bin)
-# install(FILES src/cflex/cflex.h DESTINATION include)

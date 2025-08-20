@@ -129,7 +129,11 @@ static bool parse_header_file( const char* filepath, parsed_data_t* data );
 
 // Generates the cflex_generated.h and cflex_generated.c files.
 // Returns false on failure.
-bool generate_output_files( const char* output_path, const parsed_data_t* data, const file_list_t* headers );
+bool generate_output_files( const char*      output_path,
+                            const char*      module_name,
+                            bool             default_types_only,
+                            const parsed_data_t* data,
+                            const file_list_t*   headers );
 
 /*==============================================================================================
 
