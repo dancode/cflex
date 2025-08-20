@@ -4,56 +4,67 @@
 
 ==============================================================================================*/
 
-// Helper: parse one enum value between cursor and value_end.
-// Advances cursor to just after the value.
-
 static const char*
-parse_enum_value( const char* cursor, const char* value_end, parsed_type_t* type )
+parse_enum_value( const char* cursor, parsed_type_t* type, int32_t* last_value )
 {
     if ( type->enum_info.num_values >= MAX_ENUM_VALUES )
     {
-        print_fmt( "Error: too enum values in enum\n" );
+        print_fmt( "Error: too many enum values in enum\n" );
         return NULL;
     }
 
-    parsed_enum_value_t* value = &type->enum_info.values[ type->enum_info.num_values ];
-
-    cursor                     = str_left_trim( cursor );
-
-    // Copy raw token into temp.
-    char temp[ MAX_NAME_LENGTH ];
+    cursor = str_left_trim( cursor );
+    if ( !*cursor || *cursor == '}' )
     {
-        int32_t len = (int)( value_end - cursor );
-        if ( len >= MAX_NAME_LENGTH )
+        return cursor;
+    }
+
+    const char*      name_start = cursor;
+    const char*      name_end   = cursor;
+    const char*      equals     = NULL;
+    parsed_enum_value_t* value      = &type->enum_info.values[ type->enum_info.num_values ];
+
+    // Find the end of the identifier and the optional equals sign
+    while ( *cursor && *cursor != ',' && *cursor != '}' )
+    {
+        if ( *cursor == '=' )
         {
-            len = MAX_NAME_LENGTH - 1;
+            equals = cursor;
         }
-        str_copy( temp, cursor, len );
-        temp[ len ] = '\0';
+        cursor++;
     }
+    name_end = equals ? equals : cursor;
 
-    // Strip assignment (e.g., "VALUE = 1")
+    // Trim trailing whitespace from the name
+    while ( name_end > name_start && char_is_space( *( name_end - 1 ) ) )
     {
-        char* equals = str_chr( temp, '=' );
-        if ( equals )
-            *equals = '\0';
+        name_end--;
     }
 
-    // Extract identifier
-    read_identifier( str_left_trim( temp ), value->name, MAX_NAME_LENGTH );
+    str_copy_sub( value->name, name_start, (int32_t)( name_end - name_start ), MAX_NAME_LENGTH );
 
-    if ( str_len( value->name ) > 0 )
+    if ( str_len( value->name ) == 0 )
     {
-        type->enum_info.num_values++;
+        return cursor; // Skip empty entries from multiple commas
     }
 
-    return value_end;
+    if ( equals )
+    {
+        const char* value_str = str_left_trim( equals + 1 );
+        value->value          = atoi( value_str );
+    }
+    else
+    {
+        value->value = *last_value;
+    }
+
+    *last_value = value->value + 1;
+    type->enum_info.num_values++;
+
+    return cursor;
 }
 
 /*============================================================================================*/
-
-// Parses a `typedef enum` block, expecting it to follow a `CF_ENUM()` annotation.
-// It extracts the enum's name and all of its values.
 
 static const char*
 parse_enum( const char* cursor, parsed_data_t* data )
@@ -67,8 +78,6 @@ parse_enum( const char* cursor, parsed_data_t* data )
     cursor = expect_keyword( cursor, "enum" );
     if ( !cursor )
         return NULL;
-
-    // Optional tag name (may be typedef at end of struct definition)
 
     char tag_name[ MAX_NAME_LENGTH ];
     cursor = str_left_trim( cursor );
@@ -93,54 +102,36 @@ parse_enum( const char* cursor, parsed_data_t* data )
         return NULL;
     }
 
-    // Add enum type to type list
     parsed_type_t* type        = &data->types[ data->num_types ];
     type->kind                 = PARSED_KIND_ENUM;
     type->enum_info.num_values = 0;
+    int32_t last_value         = 0;
 
-    // Parse CF_ENUM() inside body
     while ( cursor < body_end )
     {
         const char* next_comma = str_chr( cursor, ',' );
         const char* value_end  = ( next_comma && next_comma < body_end ) ? next_comma : body_end;
 
-        // custom parse for value
-        cursor = parse_enum_value( cursor, value_end, type );
+        cursor = parse_enum_value( cursor, type, &last_value );
         if ( !cursor )
             return NULL;
 
-        // skip trailing comma (found another enum value)
         if ( *cursor == ',' )
             cursor++;
-
-        cursor = str_left_trim( cursor );
+        else
+            cursor = value_end;
     }
 
-    // Move past '}'
     cursor = expect_char( body_end, '}' );
     if ( !cursor )
         return NULL;
 
-    // Read typedef enum name.
     cursor = str_left_trim( cursor );
     cursor = read_identifier( cursor, type->name, MAX_NAME_LENGTH );
 
-    // Strip (optional) trailing ';' from string name.
-    {
-        char* semi = strchr( type->name, ';' );
-        if ( semi )
-            *semi = '\0';
-    }
-
-    if ( CFLEX_BUILD_DEBUG )
-    {
-        // Debug print
-        print_fmt( "Parsed Enum '%s' with %d values\n", type->name, type->enum_info.num_values );
-        for ( int i = 0; i < type->enum_info.num_values; i++ )
-        {
-            print_fmt( "  - Value: %s\n", type->enum_info.values[ i ].name );
-        }
-    }
+    char* semi = strchr( type->name, ';' );
+    if ( semi )
+        *semi = '\0';
 
     data->num_types++;
     return cursor;

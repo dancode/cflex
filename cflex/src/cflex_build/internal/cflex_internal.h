@@ -74,7 +74,8 @@ typedef struct parsed_field_t
 // Represents a single value within a parsed enum.
 typedef struct parsed_enum_value_t
 {
-    char name[ MAX_NAME_LENGTH ];
+    char    name[ MAX_NAME_LENGTH ];
+    int32_t value;
 } parsed_enum_value_t;
 
 // Discriminator for the parsed_type_t union.
@@ -129,7 +130,11 @@ static bool parse_header_file( const char* filepath, parsed_data_t* data );
 
 // Generates the cflex_generated.h and cflex_generated.c files.
 // Returns false on failure.
-bool generate_output_files( const char* output_path, const parsed_data_t* data, const file_list_t* headers );
+bool generate_output_files( const char*      output_path,
+                            const char*      module_name,
+                            bool             default_types_only,
+                            const parsed_data_t* data,
+                            const file_list_t*   headers );
 
 /*==============================================================================================
 
