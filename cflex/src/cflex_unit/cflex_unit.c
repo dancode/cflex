@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "cflex.h"
-
 #include "cflex_unit_types.h"
 #include "cflex_default_generated.h"
 #include "cflex_unit_generated.h"
@@ -68,7 +67,6 @@ int test_find_field() {
 }
 
 int test_find_enum_value() {
-
     const cf_type_t* enum_type = cf_find_type_by_name("test_enum_t");
     TEST_ASSERT(enum_type != NULL);
     TEST_ASSERT(enum_type->kind == CF_KIND_ENUM);
@@ -76,6 +74,7 @@ int test_find_enum_value() {
     const cf_enum_value_t* val_b = cf_find_enum_value_by_name(enum_type, "TEST_ENUM_B");
     TEST_ASSERT(val_b != NULL);
     TEST_ASSERT(strcmp(val_b->name, "TEST_ENUM_B") == 0);
+    TEST_ASSERT(val_b->value == 1);
 
     const cf_enum_value_t* non_existent_name = cf_find_enum_value_by_name(enum_type, "non_existent");
     TEST_ASSERT(non_existent_name == NULL);
@@ -97,6 +96,5 @@ int main() {
     printf("All tests passed!\n");
 
     cf_shutdown();
-
     return 0;
 }

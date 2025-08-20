@@ -1,7 +1,6 @@
 #ifndef CFLEX_IMPLEMENTATION_H
 #define CFLEX_IMPLEMENTATION_H
 
-#include "cflex.h"
 #include "internal/cflex_internal.h"
 #include <string.h>
 #include <stdlib.h>
