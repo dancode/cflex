@@ -74,7 +74,8 @@ typedef struct parsed_field_t
 // Represents a single value within a parsed enum.
 typedef struct parsed_enum_value_t
 {
-    char name[ MAX_NAME_LENGTH ];
+    char    name[ MAX_NAME_LENGTH ];
+    int32_t value;
 } parsed_enum_value_t;
 
 // Discriminator for the parsed_type_t union.

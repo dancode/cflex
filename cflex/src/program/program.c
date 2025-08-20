@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "cflex.h"
-#include "cflex_implementation.h"
 #include "cflex_default_generated.h"
 #include "program_generated.h"
 
@@ -58,7 +57,6 @@ print_all_types()
             print_type_details( types[ j ] );
             printf( "\n" );
         }
-
     }
     printf( "---------------------------------\n" );
 }

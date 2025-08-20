@@ -163,7 +163,7 @@ generate_c_file( FILE*           fp,
                 for ( int j = 0; j < type->enum_info.num_values; ++j )
                 {
                     const parsed_enum_value_t* value = &type->enum_info.values[ j ];
-                    file_print_fmt( fp, "    { \"%s\", %s },\n", value->name, value->name );
+                    file_print_fmt( fp, "    { \"%s\", %d },\n", value->name, value->value );
                 }
                 file_print_fmt( fp, "};\n" );
                 file_print_fmt(
