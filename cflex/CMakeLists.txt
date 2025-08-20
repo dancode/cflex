@@ -80,6 +80,20 @@ add_custom_command(
 )
 add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
 
+
+# Command to generate 'cflex_unit' module types
+set(UNIT_MODULE_NAME "cflex_unit")
+set(UNIT_GENERATED_H ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.h)
+set(UNIT_GENERATED_C ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.c)
+add_custom_command(
+    OUTPUT ${UNIT_GENERATED_C} ${UNIT_GENERATED_H}
+    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit ${GENERATED_DIR} --name ${UNIT_MODULE_NAME}
+    DEPENDS cflex_build
+    COMMENT "Generating cflex_unit reflection files"
+    VERBATIM
+)
+add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
+
 function(cflex_add_default_module)
     set(MODULE_NAME "cflex_default")
     set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)

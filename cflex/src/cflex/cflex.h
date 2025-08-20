@@ -88,7 +88,6 @@ typedef struct cf_type_t
 
 // --- Library API ---
 
-
 // Initializes the reflection system. Must be called before any other API functions.
 void cf_initialize(void);
 
