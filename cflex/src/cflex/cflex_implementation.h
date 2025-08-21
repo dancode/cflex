@@ -49,7 +49,7 @@ cf_shutdown( void )
 }
 
 void
-cf_register_type_table( const cf_type_t* types[], int32_t count )
+cf_register_table(const cf_type_t** types, int32_t count)
 {
     if ( g_registry && g_registry->num_tables < MAX_TYPE_TABLES )
     {
