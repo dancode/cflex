@@ -14,6 +14,10 @@ project(cflex C)
 # to a sibling folder called "../bin" for cleanliness.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
 
+# Set the RPATH so that executables can find shared libraries in the same directory.
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+
 # --------------------------------------------------------------------
 # COMPILER SETTINGS
 # --------------------------------------------------------------------
@@ -168,6 +172,68 @@ function(add_cflex_target target_name type)
 endfunction()
 
 # --------------------------------------------------------------------
+# FUNCTION: add_cflex_module_target
+#
+# This function is a variant of add_cflex_target specifically for modules
+# located in subdirectories (e.g., project/modules/module_name).
+#
+function(add_cflex_module_target project_name module_name type)
+    set(options)
+    set(one_value_args)
+    set(multi_value_args SOURCES)
+    cmake_parse_arguments(ARG "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
+    # --- Generated File Setup ---
+    set(GENERATED_H ${GENERATED_DIR}/${project_name}_${module_name}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${project_name}_${module_name}_generated.c)
+    set(MODULE_PATH "src/${project_name}/modules/${module_name}")
+
+    # --- Code Generation Command ---
+    set(CFLEX_COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_PATH} ${GENERATED_DIR} --name ${project_name}_${module_name})
+    if(type STREQUAL "EXECUTABLE")
+        list(APPEND CFLEX_COMMAND --include-default-types)
+    endif()
+
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND ${CFLEX_COMMAND}
+        DEPENDS cflex_build
+        COMMENT "Generating ${project_name}_${module_name} reflection files"
+        VERBATIM
+    )
+
+    set(GENERATE_TARGET "generate_${project_name}_${module_name}")
+    add_custom_target(${GENERATE_TARGET} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    set_target_properties(${GENERATE_TARGET} PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+
+    # --- Target Creation ---
+    set(TARGET_NAME "${project_name}_${module_name}")
+    if(type STREQUAL "EXECUTABLE")
+        add_executable(${TARGET_NAME} ${ARG_SOURCES})
+    elseif(type STREQUAL "LIBRARY")
+        add_library(${TARGET_NAME} ${ARG_SOURCES})
+    elseif(type STREQUAL "SHARED_LIBRARY")
+        add_library(${TARGET_NAME} SHARED ${ARG_SOURCES})
+    endif()
+
+    # --- Dependencies and Includes ---
+    target_include_directories(${TARGET_NAME} PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_PATH}
+        src/cflex
+        ${GENERATED_DIR}
+    )
+
+    target_sources(${TARGET_NAME} PRIVATE ${GENERATED_C} ${GENERATED_H})
+
+    add_dependencies(${TARGET_NAME} ${GENERATE_TARGET})
+
+    # --- IDE Organization ---
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_PATH} PREFIX "source" FILES ${ARG_SOURCES})
+    source_group(TREE ${GENERATED_DIR} PREFIX "generated" FILES ${GENERATED_C} ${GENERATED_H})
+
+endfunction()
+
+# --------------------------------------------------------------------
 # --- CFLEX LIbrary (Header-Only)
 # --------------------------------------------------------------------
 
@@ -205,9 +271,61 @@ add_cflex_target(cflex_unit EXECUTABLE
         src/cflex_unit/cflex_unit_types.h
         src/cflex_unit/cflex_unit_cflex.c
 )
-	
+
+# --------------------------------------------------------------------
+# EXAMPLE_LIB (static library example)
+# --------------------------------------------------------------------
+add_cflex_module_target(example_lib module_1 LIBRARY
+    SOURCES
+        src/example_lib/modules/module_1/module_1.c
+        src/example_lib/modules/module_1/module_1.h
+)
+
+add_cflex_target(example_lib EXECUTABLE
+    SOURCES
+        src/example_lib/example_lib.c
+        src/example_lib/example_lib.h
+        src/example_lib/example_lib_cflex.c
+)
+
+target_link_libraries(example_lib PRIVATE example_lib_module_1)
+
+# --------------------------------------------------------------------
+# EXAMPLE_DLL (dynamic library example)
+# --------------------------------------------------------------------
+set(BUILD_SHARED_LIBS ON)
+
+add_cflex_module_target(example_dll module_1 SHARED_LIBRARY
+    SOURCES
+        src/example_dll/modules/module_1/module_1.c
+        src/example_dll/modules/module_1/module_1.h
+)
+
+add_cflex_module_target(example_dll module_2 SHARED_LIBRARY
+    SOURCES
+        src/example_dll/modules/module_2/module_2.c
+        src/example_dll/modules/module_2/module_2.h
+)
+
+add_cflex_target(example_dll EXECUTABLE
+    SOURCES
+        src/example_dll/example_dll.c
+        src/example_dll/example_dll.h
+        src/example_dll/example_dll_cflex.c
+)
+
+if(UNIX)
+    target_link_libraries(example_dll PRIVATE dl)
+endif()
+
+
 # --------------------------------------------------------------------
 
 set_target_properties(program PROPERTIES FOLDER "Apps")
 set_target_properties(cflex_unit PROPERTIES FOLDER "Tests")
 set_target_properties(cflex_build PROPERTIES FOLDER "Tools")
+set_target_properties(example_lib PROPERTIES FOLDER "Examples/Static")
+set_target_properties(example_lib_module_1 PROPERTIES FOLDER "Examples/Static")
+set_target_properties(example_dll PROPERTIES FOLDER "Examples/Dynamic")
+set_target_properties(example_dll_module_1 PROPERTIES FOLDER "Examples/Dynamic")
+set_target_properties(example_dll_module_2 PROPERTIES FOLDER "Examples/Dynamic")
