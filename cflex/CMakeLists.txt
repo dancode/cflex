@@ -98,6 +98,76 @@ set(GENERATED_DIR ${CMAKE_BINARY_DIR}/cflex_generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 # --------------------------------------------------------------------
+# FUNCTION: add_cflex_target
+#
+# This function automates the process of creating a target (executable or library)
+# that uses the cflex reflection system. It handles:
+#   1. Setting up custom commands to run the cflex_build tool.
+#   2. Passing the correct flags based on target type (executables get default types).
+#   3. Creating the target itself (add_executable or add_library).
+#   4. Linking dependencies and include directories.
+#   5. Organizing source files in the IDE.
+#
+# Usage:
+#   add_cflex_target(<name> <type> [source1] [source2] ...)
+#     <name>: The name of the target.
+#     <type>: EXECUTABLE or LIBRARY.
+#
+function(add_cflex_target target_name type)
+    set(options)
+    set(one_value_args)
+    set(multi_value_args SOURCES)
+    cmake_parse_arguments(ARG "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
+    # --- Generated File Setup ---
+    set(MODULE_NAME ${target_name})
+    set(GENERATED_H ${GENERATED_DIR}/${MODULE_NAME}_generated.h)
+    set(GENERATED_C ${GENERATED_DIR}/${MODULE_NAME}_generated.c)
+
+    # --- Code Generation Command ---
+    set(CFLEX_COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/${MODULE_NAME} ${GENERATED_DIR} --name ${MODULE_NAME})
+    if(type STREQUAL "EXECUTABLE")
+        list(APPEND CFLEX_COMMAND --include-default-types)
+    endif()
+
+    add_custom_command(
+        OUTPUT ${GENERATED_C} ${GENERATED_H}
+        COMMAND ${CFLEX_COMMAND}
+        DEPENDS cflex_build
+        COMMENT "Generating ${MODULE_NAME} reflection files"
+        VERBATIM
+    )
+
+    set(GENERATE_TARGET "generate_${MODULE_NAME}")
+    add_custom_target(${GENERATE_TARGET} DEPENDS ${GENERATED_C} ${GENERATED_H})
+    set_target_properties(${GENERATE_TARGET} PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
+
+    # --- Target Creation ---
+    if(type STREQUAL "EXECUTABLE")
+        add_executable(${target_name} ${ARG_SOURCES})
+    elseif(type STREQUAL "LIBRARY")
+        add_library(${target_name} ${ARG_SOURCES})
+    endif()
+
+    # --- Dependencies and Includes ---
+    target_include_directories(${target_name} PRIVATE
+        src/${target_name}
+        src/cflex
+        ${GENERATED_DIR}
+    )
+
+    target_sources(${target_name} PRIVATE ${GENERATED_C} ${GENERATED_H})
+    set_source_files_properties(${GENERATED_C} ${GENERATED_H} PROPERTIES HEADER_FILE_ONLY ON)
+
+    add_dependencies(${target_name} ${GENERATE_TARGET})
+
+    # --- IDE Organization ---
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/${target_name} PREFIX "source" FILES ${ARG_SOURCES})
+    source_group(TREE ${GENERATED_DIR} PREFIX "generated" FILES ${GENERATED_C} ${GENERATED_H})
+
+endfunction()
+
+# --------------------------------------------------------------------
 # --- CFLEX LIbrary (Header-Only)
 # --------------------------------------------------------------------
 
@@ -115,152 +185,26 @@ file(MAKE_DIRECTORY ${GENERATED_DIR})
 #     # ${GENERATED_DIR}
 # )
 
-# --------------------------------------------------------------------
-# --- Default Module (basic reflection types) ---
-# --------------------------------------------------------------------
-
-set(DEFAULT_MODULE_NAME "cflex_default")
-set(DEFAULT_GENERATED_H ${GENERATED_DIR}/${DEFAULT_MODULE_NAME}_generated.h)
-set(DEFAULT_GENERATED_C ${GENERATED_DIR}/${DEFAULT_MODULE_NAME}_generated.c)
-
-# Tell CMake how to create these files.
-# The "cflex_build" tool is run to generate them (with the command arugments specified)
-add_custom_command(
-    OUTPUT ${DEFAULT_GENERATED_C} ${DEFAULT_GENERATED_H}
-    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR} ${GENERATED_DIR} --name ${DEFAULT_MODULE_NAME} --default-types-only
-    DEPENDS cflex_build
-    COMMENT "Generating default reflection files"
-    VERBATIM
-)
-
-# Define a target called "generate_cflex_default" that depends on these files.
-add_custom_target(generate_cflex_default DEPENDS ${DEFAULT_GENERATED_C} ${DEFAULT_GENERATED_H})
-set_target_properties(generate_cflex_default PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-
-# --------------------------------------------------------------------
-# --- Program Module (reflection types) ---
-# --------------------------------------------------------------------
-
-set(PROGRAM_MODULE_NAME "program")
-set(PROGRAM_GENERATED_H ${GENERATED_DIR}/${PROGRAM_MODULE_NAME}_generated.h)
-set(PROGRAM_GENERATED_C ${GENERATED_DIR}/${PROGRAM_MODULE_NAME}_generated.c)
-
-# Tell CMake how to create these files.
-# The "cflex_build" tool is run to generate them (with the command arugments specified)
-# It will output is older than depdency, it will generate again (build tool was updated)
-
-add_custom_command(
-    OUTPUT ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} #we want these files!
-    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/program ${GENERATED_DIR} --name ${PROGRAM_MODULE_NAME}
-    DEPENDS cflex_build #build me first!
-    COMMENT "Generating program reflection files"
-    VERBATIM
-)
-
-# note: This command will force rebuild every compile
-# COMMAND ${CMAKE_COMMAND} -E rm -f ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H}
-
-# Define a target called "generate_program" that depends on these files.
-add_custom_target(generate_program DEPENDS ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H})
-set_target_properties(generate_program PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
-
-# --------------------------------------------------------------------
-# --- Unit Test Module (reflection types) ---
-# --------------------------------------------------------------------
-
-set(UNIT_MODULE_NAME "cflex_unit")
-set(UNIT_GENERATED_H ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.h)
-set(UNIT_GENERATED_C ${GENERATED_DIR}/${UNIT_MODULE_NAME}_generated.c)
-
-add_custom_command(
-    OUTPUT ${UNIT_GENERATED_C} ${UNIT_GENERATED_H}
-    COMMAND $<TARGET_FILE:cflex_build> ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit ${GENERATED_DIR} --name ${UNIT_MODULE_NAME}
-    DEPENDS cflex_build
-    COMMENT "Generating cflex_unit reflection files"
-    VERBATIM
-)
-
-# Define a target called "generate_cflx_unit" that depends on these files.
-add_custom_target(generate_cflex_unit DEPENDS ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
-set_target_properties(generate_cflex_unit PROPERTIES FOLDER "CMakePredefinedTargets/Hidden")
 
 # --------------------------------------------------------------------
 # Program (example application)
 # --------------------------------------------------------------------
-
-# Build the example program "program" from these source files.
-add_executable(program
-    src/program/program.c
-    src/program/program.h
-    src/program/program_cflex.c
+add_cflex_target(program EXECUTABLE
+    SOURCES
+        src/program/program.c
+        src/program/program.h
+        src/program/program_cflex.c
 )
-
-# Tell it where to find headers: its own folder, the cflex library, and the generated files.
-target_include_directories(program PRIVATE
-    src/program
-    src/cflex
-    ${GENERATED_DIR}
-)
-
-# **NEW** Add the generated headers/sources to the program target explicitly 
-# (important for IntelliSense & IDEs)
-target_sources(program PRIVATE ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H})
-set_source_files_properties( ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} PROPERTIES HEADER_FILE_ONLY ON )
-
-# Link the program against the cflex library. This transitively applies the
-# include directories from cflex to the program, which is a more robust way
-# of managing dependencies for IDEs and build systems.
-# target_link_libraries(program PRIVATE cflex)
-
-# Make sure the reflection files are generated before building "program".
-add_dependencies(program generate_cflex_default generate_program)
-
-# Group "program" files under a "program" folder in IDEs.
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/program PREFIX "source" 
-    FILES src/program/program.c src/program/program.h src/program/program_cflex.c)
-
-# Group "program" files under a "program" folder in IDEs.
-source_group(TREE ${GENERATED_DIR} PREFIX "generated" 
-    FILES ${PROGRAM_GENERATED_C} ${PROGRAM_GENERATED_H} )
 
 # --------------------------------------------------------------------
 # CFLX_UNIT (unit testing application)
 # --------------------------------------------------------------------
-
-# Build the example program "program" from these source files.
-add_executable(cflex_unit
-    src/cflex_unit/cflex_unit.c
-    src/cflex_unit/cflex_unit_types.h
-    src/cflex_unit/cflex_unit_cflex.c
+add_cflex_target(cflex_unit EXECUTABLE
+    SOURCES
+        src/cflex_unit/cflex_unit.c
+        src/cflex_unit/cflex_unit_types.h
+        src/cflex_unit/cflex_unit_cflex.c
 )
-
-# Tell it where to find headers: its own folder, the cflex library, and the generated files.
-target_include_directories(cflex_unit PRIVATE
-    src/cflex_unit
-    src/cflex
-    ${GENERATED_DIR}
-)
-
-# **NEW** Add the generated headers/sources to the program target explicitly 
-# (important for IntelliSense & IDEs)
-target_sources(cflex_unit PRIVATE ${UNIT_GENERATED_C} ${UNIT_GENERATED_H})
-set_source_files_properties( ${UNIT_GENERATED_C} ${UNIT_GENERATED_H} PROPERTIES HEADER_FILE_ONLY ON )
-
-# Link the program against the cflex library. This transitively applies the
-# include directories from cflex to the program, which is a more robust way
-# of managing dependencies for IDEs and build systems.
-# target_link_libraries(cflex_unit PRIVATE cflex)
-
-# Again, ensure reflection files exist before compiling.
-add_dependencies(cflex_unit generate_cflex_default generate_cflex_unit)
-
-# Group "cflex_unit" files under a "cflex_unit" folder.
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/cflex_unit PREFIX "source" 
-    FILES src/cflex_unit/cflex_unit.c src/cflex_unit/cflex_unit_types.h src/cflex_unit/cflex_unit_cflex.c)
-
-# Group "program" files under a "program" folder in IDEs.
-source_group(TREE ${GENERATED_DIR} PREFIX "generated" 
-    FILES ${UNIT_GENERATED_C} ${UNIT_GENERATED_H} )
 	
 # --------------------------------------------------------------------
 

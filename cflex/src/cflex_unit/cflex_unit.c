@@ -100,7 +100,6 @@ int
 main()
 {
     cf_initialize();
-    cflex_default_register_types();
     cflex_unit_register_types();
 
     printf( "--- Running C-Flex Unit Tests ---\n" );
