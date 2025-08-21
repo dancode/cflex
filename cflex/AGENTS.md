@@ -29,7 +29,7 @@ This file provides instructions for AI agents working on this codebase.
 	1. Header-Only Library: The cflex runtime is a header-only library. 
 	2. This library is intended to be small, lightweight, and easy to be build. The unity build design is not to be questioned (only improved).
 	3. Since this is a small library, global state is allowed as the program starts and ends after a single short execution pass.
-	4. The public API is in cflex.h. The implementation is in cflex_implementation.h and is meant to be included in exactly one user source file.
+	4. The public API is in cflex.h. The implementation is in cflex_implementation.c and is meant to be included in exactly one user source file.
 	5. Unity Build for Internals: Internal library components (like internal/cflex_parser.h) are not compiled directly but are included by cflex_implementation.h.
 	6. Modern CMake: We use modern CMake practices (INTERFACE libraries, target_link_libraries) to manage dependencies. Changes to CMakeLists.txt should respect this pattern.	
 	

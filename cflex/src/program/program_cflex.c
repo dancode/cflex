@@ -5,4 +5,4 @@
 // This compiles the reflection data directly into this translation unit.
 #include "program_generated.c"
 
-#include "cflex_implementation.h"    // this is the same as c file.
+#include "cflex_implementation.c"    // this is the same as c file.

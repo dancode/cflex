@@ -4,4 +4,4 @@
 // Include the generated C files for the modules this executable needs.
 #include "cflex_unit_generated.c"
 
-#include "cflex_implementation.h"
+#include "cflex_implementation.c"
