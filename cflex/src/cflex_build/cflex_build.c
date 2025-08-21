@@ -37,49 +37,62 @@ main( int argc, char** argv )
     const char* module_name         = "cflex";
     bool        include_default_types = false;
 
-    // --- Argument Parsing ---
-    int arg_idx = 1;
-    while ( arg_idx < argc )
+    // If no command-line arguments are provided, assume debug mode for IDEs.
+    if ( argc == 1 )
     {
-        const char* arg = argv[ arg_idx ];
-        if ( strcmp( arg, "--name" ) == 0 )
+        print_fmt( "--- No arguments provided, running in debug mode with hardcoded paths. ---\n" );
+        input_path          = "F:/C/cflex/cflex/src/program";
+        output_path         = "F:/C/cflex/cflex/build/cflex_generated";
+        module_name         = "program";
+        include_default_types = true;    // Typically you'd want this for an executable.
+    }
+    else
+    {
+        // --- Argument Parsing for command-line use ---
+        int arg_idx = 1;
+        while ( arg_idx < argc )
         {
-            if ( arg_idx + 1 < argc )
+            const char* arg = argv[ arg_idx ];
+            if ( strcmp( arg, "--name" ) == 0 )
             {
-                module_name = argv[ arg_idx + 1 ];
-                arg_idx += 2;
+                if ( arg_idx + 1 < argc )
+                {
+                    module_name = argv[ arg_idx + 1 ];
+                    arg_idx += 2;
+                }
+                else
+                {
+                    file_print_fmt( stderr, "Error: --name requires an argument.\n" );
+                    return 1;
+                }
+            }
+            else if ( strcmp( arg, "--include-default-types" ) == 0 )
+            {
+                include_default_types = true;
+                arg_idx++;
             }
             else
             {
-                file_print_fmt( stderr, "Error: --name requires an argument.\n" );
-                return 1;
+                if ( !input_path )
+                {
+                    input_path = arg;
+                }
+                else if ( !output_path )
+                {
+                    output_path = arg;
+                }
+                arg_idx++;
             }
-        }
-        else if ( strcmp( arg, "--include-default-types" ) == 0 )
-        {
-            include_default_types = true;
-            arg_idx++;
-        }
-        else
-        {
-            if ( !input_path )
-            {
-                input_path = arg;
-            }
-            else if ( !output_path )
-            {
-                output_path = arg;
-            }
-            arg_idx++;
         }
     }
 
     if ( !input_path || !output_path )
     {
-        file_print_fmt(
-            stderr,
-            "Usage: %s <input_path> <output_path> [--name <module_name>] [--include-default-types]\n",
-            argv[ 0 ] );
+        file_print_fmt( stderr,
+                        "Usage: %s <input_path> <output_path> [--name <module_name>] "
+                        "[--include-default-types]\n"
+                        "Or run with no arguments for a debug session with hardcoded paths.\n",
+                        argv[ 0 ] );
         return 1;
     }
 
