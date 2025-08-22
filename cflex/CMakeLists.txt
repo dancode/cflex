@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 # Define the project name and language, "C" means it's written in C (not C++).
 project(cflex C)
 
+
 # --------------------------------------------------------------------
 # OUTPUT DIRECTORIES
 # --------------------------------------------------------------------
@@ -15,17 +16,47 @@ project(cflex C)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
 
 # --------------------------------------------------------------------
+# CHOOSE COMPILER
+# --------------------------------------------------------------------
+
+if (USE_CLANG)
+    # This block will be executed because CLANG_IS_ENABLED is TRUE
+	# Set the C compiler to Clang and the toolset to ClangCL.
+    set(CMAKE_C_COMPILER "clang-cl")
+    set(CMAKE_GENERATOR_TOOLSET "ClangCL" CACHE STRING "Visual Studio Toolset" FORCE)
+    
+    # Configure Clang-specific options
+    set(CMAKE_C_CLANG_TIDY "clang-tidy;-checks=*")    
+	
+	# Turn on a comprehensive set of warnings and treat them as errors.
+    # add_compile_options(-Wall -Wextra -pedantic -Werror)
+    # add_compile_options(-Wall -Wextra -Werror)
+	
+	# You can also add more specific warnings as needed, e.g.,
+    # add_compile_options(-Wformat -Wunused-variable)
+	
+else()
+
+    # Configure MSVC-specific options
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(CMAKE_C_EXTENSIONS OFF)
+    add_compile_options(/W4 /WX)
+	
+endif()
+
+# --------------------------------------------------------------------
 # COMPILER SETTINGS
 # --------------------------------------------------------------------
 
 # Set C11 as the standard, require it, and disable extensions for strictness
-set(CMAKE_C_STANDARD 11)
+# set(CMAKE_C_STANDARD 11)
 
 # Require it (don’t silently fall back to older versions).
-set(CMAKE_C_STANDARD_REQUIRED ON)
+# set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Disable compiler "extensions" so we stick strictly to C11 only,
-set(CMAKE_C_EXTENSIONS OFF)
+# set(CMAKE_C_EXTENSIONS OFF)
 
 # Enable solution folders for better organization in Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -34,11 +65,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # COMPILER WARNINGS
 # --------------------------------------------------------------------
 
-if(MSVC)
-    add_compile_options(/W4 /WX)
-else()
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
-endif()
+# if(MSVC)
+#     add_compile_options(/W4 /WX)
+# else()
+#     add_compile_options(-Wall -Wextra -pedantic -Werror)
+# endif()
 
 # --------------------------------------------------------------------
 # CFLX REFLECTION LIBRARY FLES

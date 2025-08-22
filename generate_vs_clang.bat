@@ -13,7 +13,7 @@ echo Generating Visual Studio solution in %BUILD_DIR%...
 REM Generate the Visual Studio solution for 64-bit builds.
 REM -- No need to specify the full path to the VS installation --
 REM cmake -B %BUILD_DIR% -S %SOURCE_DIR% -G "Visual Studio 17 2022" -A x64
-cmake -B %BUILD_DIR% -S %SOURCE_DIR% -G "Visual Studio 17 2022" -A x64
+cmake -B %BUILD_DIR% -S %SOURCE_DIR% -G "Visual Studio 17 2022" -DUSE_CLANG=ON
 
 REM Generate the Visual Studio solution for 64-bit builds, specifying the Clang toolset.
 REM cmake -B %BUILD_DIR% -S %SOURCE_DIR% -G "Visual Studio 17 2022" -A x64 -T "ClangCL"
